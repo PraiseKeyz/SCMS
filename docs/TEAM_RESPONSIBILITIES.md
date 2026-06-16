@@ -1,8 +1,8 @@
 # SCMS — Team Responsibilities & Task Breakdown
 
 > Companion to [`SCMS_Scaffold_Plan.md`](./SCMS_Scaffold_Plan.md). That document defines the
-> overall architecture, Prisma schema, and API/WebSocket contracts — this document assigns
-> ownership of each piece to a specific person and breaks each module into concrete tasks.
+> overall architecture, Prisma schema, and API contracts — this document assigns ownership of
+> each piece to a specific person and breaks each module into concrete tasks.
 
 ## Team
 
@@ -16,7 +16,7 @@
 
 ## Already in place (shared foundation)
 
-Both backend devs build on top of this — no need to redo it:
+Both backend devs build on top of this — no need to redo any of it:
 
 - `src/main.ts` — global `api` prefix, URI versioning (`/api/v1/...`), compression,
   cookie-parser, global `ValidationPipe`, global `HttpExceptionFilter` +
@@ -26,117 +26,123 @@ Both backend devs build on top of this — no need to redo it:
 - `src/common/interceptors/transform.interceptor.ts` — every success response is wrapped as
   `{ success: true, message, data, error: null, timestamp }`.
   **Controllers/services must return `{ message?, data? }`** — the interceptor reads those keys.
-- `src/app.module.ts` — `ConfigModule`, `ScheduleModule`, `ThrottlerModule` (global rate limit)
+- `src/common/decorators/public.decorator.ts` — `@Public()` + `IS_PUBLIC_KEY`
+- `src/common/decorators/current-user.decorator.ts` — `@CurrentUser()` param decorator
+- `src/common/decorators/roles.decorator.ts` — `@Roles(Role.WARDEN)` etc.
+- `src/common/constants/safe-user.constant.ts` — `SafeUserSelect` (id, name, email, role,
+  createdAt — **excludes password**) + `SafeUser` type
+- `src/app.module.ts` — `ConfigModule`, `ScheduleModule`, `ThrottlerModule` (global rate
+  limit), global `APP_GUARD` chain: `ThrottlerGuard → JwtAuthGuard → RolesGuard`
 - `src/prisma/` — global `PrismaModule` + `PrismaService` (connect/disconnect lifecycle)
-- `prisma/schema.prisma` — all models from the scaffold plan already defined: `User`, `Zone`,
-  `Gate`, `Landmark`, `ZoneStatus`, `BroadcastAlert`, `Incident`, `WardenCheckin`
-- `tsconfig.json` — `@/*` path alias maps to `src/*`
-- `.env` / `.env.example` — `PORT`, `DATABASE_URL`, `FRONTEND_URL`
+- `prisma/schema.prisma` — all models defined. **Confirmed design decisions:**
+  - `Role` enum has only `WARDEN` and `ADMIN` — no `VISITOR` role
+  - `User.email` is unique — used as the login identifier
+  - `User.password` is required (argon2-hashed) — every user in the system is staff
+  - Visitors are **anonymous** — no login, no `User` record; all public routes are open
+  - `ADMIN` passes every role check automatically — no need to list it on guarded routes
+- `tsconfig.json` — `@/*` path alias maps to `src/*`; ESM/nodenext module resolution
+- `.env` / `.env.example` — `PORT`, `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `FRONTEND_URL`
+- **Seed script** (`prisma/seed.ts`) — already run. See credentials below.
 
-If either backend dev needs a new env var (e.g. `JWT_SECRET`), add it to both `.env` and
-`.env.example` and mention it in your PR so the other person picks it up.
+### Seed credentials (dev only)
+
+| Role | Email | Password |
+|------|-------|----------|
+| WARDEN | `alpha@scms.dev` | `Warden@123` |
+| WARDEN | `beta@scms.dev` | `Warden@456` |
+| ADMIN | `admin@scms.dev` | `Admin@9999` |
+
+Re-run anytime with `pnpm prisma:seed` (it wipes and re-seeds).
 
 ---
 
 ## Praise — Auth, Users, Campus
 
-### 1. Auth module (`src/auth/`)
+### 1. Auth module (`src/auth/`) ✅ COMPLETE
 
-Files to create:
-- `auth.module.ts`
-- `auth.controller.ts`
-- `auth.service.ts`
-- `strategies/jwt.strategy.ts`
-- `guards/jwt-auth.guard.ts`
-- `guards/roles.guard.ts`
-- `dto/login.dto.ts`
-- `dto/warden-login.dto.ts`
-
-Decorators (in `src/common/decorators/`, shared with Dipo):
-- `public.decorator.ts` — `@Public()` + `IS_PUBLIC_KEY`, read by `JwtAuthGuard` to skip auth
-- `current-user.decorator.ts` — `@CurrentUser()` param decorator, pulls `request.user`
-- `roles.decorator.ts` — `@Roles('WARDEN', 'ADMIN')`, read by `RolesGuard`
-
-Add `JWT_SECRET` (and optionally `JWT_EXPIRES_IN`) to `.env` / `.env.example`, register
-`@nestjs/jwt` + `@nestjs/passport` + `passport-jwt` in `auth.module.ts` (same pattern as
-`@nestjs/config` is already registered in `app.module.ts`).
+All auth endpoints are implemented and building cleanly.
 
 #### Endpoints
 
-| Method | Path | Access | Request body | Response `data` | Notes |
-|--------|------|--------|---------------|------------------|-------|
-| `POST` | `/auth/login` | `@Public()` | `{ name: string }` | `{ user, accessToken }` | Visitor "login" — no password. Creates a `User` with `role: VISITOR` if one doesn't exist for that name/device, or reissues a token. **Decide and document the exact identity strategy** (e.g. device-generated UUID sent from the app) since visitors have no email/password in the schema. |
-| `POST` | `/auth/warden-login` | `@Public()` | `{ id: string, pin: string }` (`WardenLoginDto`) | `{ user, accessToken }` | Look up `User` by `id`, compare `pin` with `bcrypt.compare`. Throw `UnauthorizedException` on mismatch. |
-| `GET` | `/auth/me` | JWT | — | `{ user }` (the `SafeUser`, no `pin`) | Use `@CurrentUser()`. |
+| Method | Path | Access | Request body | Response `data` |
+|--------|------|--------|--------------|-----------------|
+| `POST` | `/auth/login` | `@Public()` | `{ email, password }` | `{ user: SafeUser, accessToken }` |
+| `GET` | `/auth/me` | JWT | — | `{ user: SafeUser }` |
+| `PATCH` | `/auth/change-password` | JWT | `{ currentPassword, newPassword }` | — |
 
-#### Tasks checklist
-- [ ] `LoginDto` / `WardenLoginDto` with `class-validator` decorators
-- [ ] `JwtStrategy` — verify token, load user via `PrismaService`, exclude `pin` from the
-      returned object (define a `SafeUserSelect` constant in `src/common/constants/`)
-- [ ] `JwtAuthGuard` extending `AuthGuard('jwt')`, honoring `@Public()`
-- [ ] `RolesGuard` reading `@Roles(...)` metadata + `request.user.role`
-- [ ] Register `JwtAuthGuard` as a **global guard** in `app.module.ts` (`APP_GUARD`) once it's
-      ready — coordinate with Dipo since this affects every route, including his
-- [ ] `AuthService.signToken(user)` — signs `{ sub: user.id, role: user.role }`
-- [ ] Hash warden PINs with `argon2` or `bcrypt` (pick one, add to `package.json`)
-- [ ] Unit tests for `AuthService` (PIN check, token shape)
+**Notes:**
+- Single login endpoint for both WARDEN and ADMIN — role is encoded in the JWT payload
+- `accessToken` is returned in the **response body** (not a cookie) — Flutter reads it and
+  stores via `flutter_secure_storage`, then sends as `Authorization: Bearer <token>`
+- `ADMIN` passes all `@Roles(...)` checks automatically — no need to add `Role.ADMIN` to
+  every guard decorator
 
-### 2. Users module (`src/users/`)
+#### Files
+- `auth.module.ts`, `auth.controller.ts`, `auth.service.ts`
+- `strategies/jwt.strategy.ts` — Bearer token only (no cookie extractor)
+- `guards/jwt-auth.guard.ts` — extends `AuthGuard('jwt')`, honours `@Public()`
+- `guards/roles.guard.ts` — checks `@Roles(...)` metadata; ADMIN always passes
+- `dto/login.dto.ts` — `@IsEmail() email`, `@IsString() password`
+- `dto/change-password.dto.ts` — `currentPassword`, `@MinLength(8) newPassword`
 
-- `users.module.ts`, `users.service.ts`
-- `dto/create-user.dto.ts`
+---
 
-#### Tasks checklist
-- [ ] `UsersService.findById(id)`
-- [ ] `UsersService.findByName(name)` (for visitor login lookup)
-- [ ] `UsersService.create(dto)` — used by both visitor and warden creation paths
-- [ ] Export `UsersService` so `AuthModule` can use it (or fold directly into
-      `AuthService` if you'd rather keep it minimal — your call, document the choice)
+### 2. Users module (`src/users/`) ✅ COMPLETE
 
-### 3. Campus module (`src/campus/`)
+All user management endpoints are implemented. All routes are ADMIN-only.
+
+#### Endpoints
+
+| Method | Path | Access | Request body | Response `data` |
+|--------|------|--------|--------------|-----------------|
+| `POST` | `/users` | `@Roles(ADMIN)` | `{ name, email, role, password }` | `{ user: SafeUser }` |
+| `GET` | `/users` | `@Roles(ADMIN)` | — | `{ users: SafeUser[] }` |
+| `GET` | `/users/:id` | `@Roles(ADMIN)` | — | `{ user: SafeUser }` |
+| `DELETE` | `/users/:id` | `@Roles(ADMIN)` | — | — |
+
+**Notes:**
+- No public registration — admin creates all warden/admin accounts
+- `password` min 8 characters; hashed with argon2 before storage
+- `SafeUser` never includes the `password` field
+
+#### Files
+- `users.module.ts`, `users.controller.ts`, `users.service.ts`
+- `dto/create-user.dto.ts` — `name`, `@IsEmail() email`, `@IsEnum(Role) role`,
+  `@MinLength(8) password`
+
+---
+
+### 3. Campus module (`src/campus/`) ⬜ TODO
 
 - `campus.module.ts`, `campus.controller.ts`, `campus.service.ts`
-- `dto/campus-map.dto.ts` (response shape only, no input validation needed — all GET)
 
 #### Endpoints
 
 | Method | Path | Access | Response `data` |
-|--------|------|--------|------------------|
-| `GET` | `/campus/map` | `@Public()` | `{ zones: GeoJSON.FeatureCollection, gates: Gate[], landmarks: Landmark[] }` — bundled for one initial app load |
-| `GET` | `/campus/zones` | `@Public()` | `GeoJSON.FeatureCollection` (each `Zone.geojson` as a Feature with `id`, `name`, `label`, `capacity`, `type` in `properties`) |
+|--------|------|--------|-----------------|
+| `GET` | `/campus/map` | `@Public()` | `{ zones: GeoJSON.FeatureCollection, gates: Gate[], landmarks: Landmark[] }` |
+| `GET` | `/campus/zones` | `@Public()` | `GeoJSON.FeatureCollection` (each zone's `geojson` + `id`, `name`, `label`, `capacity`, `type` in `properties`) |
 | `GET` | `/campus/gates` | `@Public()` | `Gate[]` |
 | `GET` | `/campus/landmarks` | `@Public()` | `Landmark[]` |
 
 #### Tasks checklist
-- [ ] `CampusService.getMapBundle()` — single Prisma call per table, assembled into one object
-- [ ] `CampusService.getZonesAsGeoJSON()` — map `Zone.geojson` + metadata into a
-      `FeatureCollection`
-- [ ] Mark all four routes `@Public()` (no login required to view the map)
-- [ ] Make sure `/campus/*` is usable **before** the global `JwtAuthGuard` lands — coordinate
-      timing with the auth rollout
-
-### 4. Seed script (`prisma/seed.ts`)
-
-This unblocks Tesals early — get this done first if possible.
-
-#### Tasks checklist
-- [ ] Add `"prisma": { "seed": "ts-node prisma/seed.ts" }` to `package.json` (or equivalent
-      for the ESM setup — check how fulltiime's seed script is wired if unsure)
-- [ ] Seed a handful of `Zone` records (mix of `PARKING`/`VENUE`/`ROAD`) with real GeoJSON
-      polygons traced from the campus map (coordinate with whoever produces
-      `assets/map/campus_geojson.json` for the frontend so IDs/names line up)
-- [ ] Seed `Gate` records (entry/exit points)
-- [ ] Seed `Landmark` records (halls, clinic, toilets, admin, food)
-- [ ] Seed 1–2 `User` records with `role: WARDEN` and a known PIN (e.g. `1234`) for demo
-      logins — print the credentials to console when the seed runs
-- [ ] Seed 1 `User` with `role: ADMIN`
-- [ ] Document seed credentials in this file or a `SEED_DATA.md` once done
+- [ ] `CampusService.getMapBundle()` — single Prisma query per table, assembled into one object
+- [ ] `CampusService.getZonesAsGeoJSON()` — map `Zone.geojson` + metadata into a `FeatureCollection`
+- [ ] Mark all four routes `@Public()`
+- [ ] Register `CampusModule` in `app.module.ts`
 
 ---
 
-## Dipo — Parking, Alerts/Wardens, Real-time, Recommendations
+### 4. Seed script (`prisma/seed.ts`) ✅ COMPLETE
 
-### 1. Parking module (`src/parking/`)
+Already seeded — 3 users, 5 zones, 3 gates, 6 landmarks, initial zone statuses.
+Re-run with `pnpm prisma:seed`.
+
+---
+
+## Dipo — Parking, Alerts, Real-time, Recommendations
+
+### 1. Parking module (`src/parking/`) ⬜ TODO
 
 - `parking.module.ts`, `parking.controller.ts`, `parking.service.ts`, `parking.gateway.ts`
 - `dto/update-zone-status.dto.ts`, `dto/nearest-zone-query.dto.ts`
@@ -144,27 +150,25 @@ This unblocks Tesals early — get this done first if possible.
 #### Endpoints
 
 | Method | Path | Access | Request | Response `data` |
-|--------|------|--------|---------|------------------|
-| `GET` | `/parking/zones` | JWT (any role) | — | `Zone[]` each with its latest `ZoneStatus` joined in |
-| `PATCH` | `/parking/zones/:id/status` | `@Roles('WARDEN')` | `{ status: 'AVAILABLE' \| 'LIMITED' \| 'FULL' }` | updated `ZoneStatus`, plus emits `zone:status_updated` on the `/parking` socket namespace |
-| `GET` | `/parking/nearest?lat=&lng=&landmarkId=` | JWT | query params | `{ recommendedZoneId, rankedZones: [...] }` — delegates scoring to the `recommendations` module |
+|--------|------|--------|---------|-----------------|
+| `GET` | `/parking/zones` | JWT (any role) | — | `Zone[]` each with its latest `ZoneStatus` |
+| `PATCH` | `/parking/zones/:id/status` | `@Roles(WARDEN)` | `{ status }` | updated `ZoneStatus`; also emits `zone:status_updated` on `/parking` socket namespace |
+| `GET` | `/parking/nearest?lat=&lng=` | JWT | query params | `{ recommendedZoneId, rankedZones }` |
 
 #### Tasks checklist
-- [ ] `ParkingService.getZonesWithStatus()` — latest `ZoneStatus` per `Zone` (use
-      `findFirst` ordered by `updatedAt desc`, or a raw query if needed for performance)
-- [ ] `ParkingService.updateZoneStatus(zoneId, status, updatedById)` — creates a new
-      `ZoneStatus` row, then calls `ParkingGateway.emitZoneStatusUpdated(...)`
-- [ ] `UpdateZoneStatusDto` — `status` validated against `ZoneStatusEnum` via
-      `class-validator`'s `IsEnum`
-- [ ] `NearestZoneQueryDto` — `lat`, `lng` as numbers (`@Type(() => Number)` +
-      `@IsNumber()`), optional `landmarkId` as string
+- [ ] `ParkingService.getZonesWithStatus()` — latest `ZoneStatus` per zone (order by `updatedAt desc`)
+- [ ] `ParkingService.updateZoneStatus(zoneId, status, updatedById)` — creates a new `ZoneStatus`
+      row then calls `ParkingGateway.emitZoneStatusUpdated(...)`
+- [ ] `UpdateZoneStatusDto` — `status` validated as `@IsEnum(ZoneStatusEnum)`
+- [ ] `NearestZoneQueryDto` — `lat`, `lng` as `@Type(() => Number) @IsNumber()`
 - [ ] `ParkingGateway` (`@WebSocketGateway({ namespace: '/parking' })`):
-  - `subscribe:zones` handler (client → server, can be a no-op / room join for now)
-  - `emitZoneStatusUpdated({ zoneId, status, updatedAt })` broadcast method called from
-    `ParkingService`
+  - `subscribe:zones` client → server handler
+  - `emitZoneStatusUpdated({ zoneId, status, updatedAt })` broadcast
 - [ ] `GET /parking/nearest` calls `RecommendationsService.recommendParkingZone(...)`
 
-### 2. Alerts module (`src/alerts/`)
+---
+
+### 2. Alerts module (`src/alerts/`) ⬜ TODO
 
 - `alerts.module.ts`, `alerts.controller.ts`, `alerts.service.ts`, `alerts.gateway.ts`,
   `warden.controller.ts`
@@ -172,65 +176,53 @@ This unblocks Tesals early — get this done first if possible.
 
 #### Endpoints
 
-| Method | Path | Access | Request | Response `data` |
-|--------|------|--------|---------|------------------|
-| `POST` | `/alerts/broadcast` | `@Roles('WARDEN')` | `{ message, radiusMeters, centerLat, centerLng, expiresAt }` (`BroadcastAlertDto`) | created `BroadcastAlert`, emits `alert:broadcast` on `/alerts` |
-| `POST` | `/alerts/incident` | `@Roles('WARDEN')` | `{ type, description, latitude, longitude }` (`CreateIncidentDto`) | created `Incident`, emits `alert:incident` on `/alerts` |
-| `GET` | `/alerts/active` | JWT | — | `BroadcastAlert[]` where `active: true` and `expiresAt > now` |
-| `PATCH` | `/alerts/incident/:id/resolve` | `@Roles('WARDEN')` | — | updated `Incident` with `resolved: true` |
-| `GET` | `/wardens/deployment` | `@Roles('ADMIN')` | — | active wardens + their latest `WardenCheckin` per zone |
-| `POST` | `/wardens/checkin` | `@Roles('WARDEN')` | `{ zoneId }` | created `WardenCheckin` |
+| Method | Path | Access | Request body | Response `data` |
+|--------|------|--------|--------------|-----------------|
+| `POST` | `/alerts/broadcast` | `@Roles(WARDEN)` | `{ message, radiusMeters, centerLat, centerLng, expiresAt }` | created `BroadcastAlert`; emits `alert:broadcast` |
+| `POST` | `/alerts/incident` | `@Roles(WARDEN)` | `{ type, description, latitude, longitude }` | created `Incident`; emits `alert:incident` |
+| `GET` | `/alerts/active` | JWT | — | `BroadcastAlert[]` where `active: true AND expiresAt > now` |
+| `PATCH` | `/alerts/incident/:id/resolve` | `@Roles(WARDEN)` | — | updated `Incident` |
+| `GET` | `/wardens/deployment` | `@Roles(ADMIN)` | — | wardens + their latest `WardenCheckin` |
+| `POST` | `/wardens/checkin` | `@Roles(WARDEN)` | `{ zoneId }` | created `WardenCheckin` |
 
 #### Tasks checklist
-- [ ] `AlertsService.broadcast(dto, createdById)` — persist + call
-      `AlertsGateway.emitBroadcast(...)`
-- [ ] `AlertsService.createIncident(dto, reportedById)` — persist + call
-      `AlertsGateway.emitIncident(...)` (incident events should probably only go to
-      `WARDEN`/`ADMIN` clients — see gateway notes below)
+- [ ] `AlertsService.broadcast(dto, createdById)` — persist + emit
+- [ ] `AlertsService.createIncident(dto, reportedById)` — persist + emit
 - [ ] `AlertsService.getActiveAlerts()` — filter `active: true AND expiresAt > now()`
 - [ ] `AlertsService.resolveIncident(id)`
 - [ ] `AlertsGateway` (`@WebSocketGateway({ namespace: '/alerts' })`):
-  - `subscribe:alerts` handler — accepts `{ lat, lng }`, join a room (or just broadcast to
-    all for MVP — radius filtering can be a stretch goal)
+  - `subscribe:alerts` handler
   - `emitBroadcast(alert)` → `alert:broadcast`
-  - `emitIncident(incident)` → `alert:incident` (consider a separate room/namespace for
-    warden/admin-only events if time allows; otherwise document it as a known MVP gap)
-- [ ] `WardenController` — separate controller, same module, for the two `/wardens/*` routes
-- [ ] `WardenCheckinService.checkin(wardenId, zoneId)` and a simple "deployment" query
-      (latest checkin per warden)
+  - `emitIncident(incident)` → `alert:incident`
+- [ ] `WardenController` — separate controller in the same alerts module
+- [ ] `WardenService.checkin(wardenId, zoneId)` and `getDeployment()`
 
-### 3. Recommendations / heuristics module (`src/recommendations/`)
+---
 
-This is the plain-TS replacement for the FastAPI ML service discussed earlier — no Python,
-no model training, just deterministic scoring functions per `SCMS_Scaffold_Plan.md` §3.5.
+### 3. Recommendations module (`src/recommendations/`) ⬜ TODO
+
+Plain TypeScript heuristics — no Python, no ML service.
 
 - `recommendations.module.ts`, `recommendations.service.ts`
-- `utils/geo.util.ts` — Haversine distance helper (shared, no module dependency)
+- `utils/geo.util.ts`
 
 #### Tasks checklist
 - [ ] `geo.util.ts`: `haversineDistanceMeters(a: {lat,lng}, b: {lat,lng}): number`
 - [ ] `RecommendationsService.recommendParkingZone({ driverLat, driverLng, zones })`:
-  - score = `0.6 * (1 - normalizedDistance) + 0.4 * (1 - occupancyRatio)`
+  - score = `0.6 × (1 − normalizedDistance) + 0.4 × (1 − occupancyRatio)`
   - return `{ recommendedZoneId, rankedZones: [{ zoneId, score, walkDistanceM, occupancyPct }] }`
-  - exported and consumed by `ParkingService.getNearestZone(...)`
 - [ ] `RecommendationsService.estimateEta({ origin, destination, crowdLevel })`:
-  - base speed 1.2 m/s × crowd multiplier table (`light: 1.0, moderate: 1.4, heavy: 1.9` —
-    confirm/adjust multipliers, document wherever they end up)
-- [ ] `RecommendationsService.predictCrowd({ eventType, hoursAhead })` — simple lookup
-      table by event type + time band (stub with a couple of hardcoded event types for demo)
-- [ ] `RecommendationsService.detectAnomaly({ zoneId, recentUpdateTimestamps })` —
-      Z-score on update frequency vs. a baseline; return `{ isAnomaly, reason, severity }`
-- [ ] Optional: wire `detectAnomaly` into a `@Cron()` job (via `ScheduleModule`, already
-      registered) that runs every 5 minutes over recent `ZoneStatus` updates and pushes an
-      `alert:incident`-style event if anomalous — stretch goal, only if time permits
+  - base speed 1.2 m/s × crowd multiplier (`light: 1.0, moderate: 1.4, heavy: 1.9`)
+- [ ] `RecommendationsService.predictCrowd({ eventType, hoursAhead })` — lookup table by
+      event type + time band
+- [ ] `RecommendationsService.detectAnomaly({ zoneId, recentUpdateTimestamps })` — Z-score
+      on update frequency; return `{ isAnomaly, reason, severity }`
 
 ### Cross-dependency with Praise
-- `@Roles('WARDEN')` / `@Roles('ADMIN')` guards and the global `JwtAuthGuard` are Praise's
-  deliverables. Until those land, stub a local `FakeUser` via a request header or a temporary
-  `@CurrentUser()` that returns a hardcoded warden so you're not blocked — replace with the
-  real guard once available.
-- `SafeUserSelect` / `CurrentUser` decorator live in `src/common/` — once Praise adds them,
-  import from there rather than duplicating.
+- `@Roles(Role.WARDEN)` / `@Roles(Role.ADMIN)` guards and `JwtAuthGuard` are **already in
+  place globally** — no setup needed on your end. All protected routes just work.
+- Use `@CurrentUser() user: SafeUser` from `src/common/decorators/current-user.decorator.ts`
+  to get the logged-in user in any controller.
 
 ---
 
@@ -241,82 +233,67 @@ Build in this order so each stage produces something demoable even if later stag
 ### 1. Core shell
 - `lib/core/constants.dart` — API base URL (`http://<host>:3000/api/v1`), Mapbox token
 - `lib/core/theme.dart`, `lib/core/router.dart` (GoRouter), `lib/core/di.dart` (get_it)
-- `lib/services/api_service.dart` — Dio client; add a response interceptor that unwraps the
-  backend's envelope (`{ success, message, data, error, timestamp }`) so the rest of the app
-  only ever deals with `data` (or throws using `error.message` on `success: false`)
-- `lib/services/auth_service.dart` — calls `/auth/login` / `/auth/warden-login`, stores JWT
-  via `flutter_secure_storage`, attaches `Authorization: Bearer <token>` (or relies on the
-  cookie if the backend sets one — confirm with Praise which mechanism is active)
+- `lib/services/api_service.dart` — Dio client with two interceptors:
+  1. **Request** — attach `Authorization: Bearer <token>` if token exists in storage
+  2. **Response** — unwrap the `{ success, message, data, error }` envelope; on
+     `success: false` throw a typed error using `error.message`
+- `lib/services/auth_service.dart` — calls `POST /auth/login` with `{ email, password }`,
+  stores returned `accessToken` via `flutter_secure_storage`
 - `lib/providers/auth_provider.dart` — Riverpod auth state
-- Screens: `splash_screen.dart` (check stored token → route), `role_select_screen.dart`,
-  `warden_login_screen.dart`
 
 #### Tasks checklist
-- [ ] Models: `lib/models/user.dart`, `zone.dart`, `gate.dart`, `landmark.dart`, `alert.dart`,
-      `incident.dart` — match the Prisma model fields in `prisma/schema.prisma`
-      (`Zone.type` ↔ `ZoneType`, `Zone` status comes from `ZoneStatus.status`, etc.)
-- [ ] `ApiService` base + interceptor, error handling that surfaces
-      `error.details`/`message` from the envelope
-- [ ] `AuthService.login(name)`, `AuthService.wardenLogin(id, pin)`, `AuthService.logout()`
-- [ ] `SplashScreen` → checks stored token → routes to role-select or home
-- [ ] `RoleSelectScreen` (Visitor / Driver / Warden)
+- [ ] Models: `user.dart`, `zone.dart`, `gate.dart`, `landmark.dart`, `alert.dart`,
+      `incident.dart` — match Prisma field names exactly
+- [ ] `AuthService.login(email, password)` → `POST /auth/login` → store `accessToken`
+- [ ] `AuthService.logout()` — clear token, redirect to role select
+- [ ] `SplashScreen` — check stored token: valid → route to home, else → role select
+- [ ] `RoleSelectScreen` — **Visitor** (anonymous, go straight to map) and **Staff** (go to
+      login screen with email + password fields)
+- [ ] `LoginScreen` — single screen for both wardens and admin (role is determined from the
+      JWT after login, not chosen upfront)
 
-### 2. Visitor flow — maps to MVP criterion "visitor navigates gate → landmark"
+### 2. Visitor flow
 - `lib/services/campus_service.dart` — `GET /campus/map`
 - `lib/providers/campus_provider.dart` — cached `FutureProvider`
-- `lib/widgets/campus_map_widget.dart` — Mapbox GL + GeoJSON zone overlays from
-  `/campus/zones`
-- Screens: `visitor_home_screen.dart`, `landmark_search_screen.dart`,
-  `navigation_screen.dart`
+- `lib/widgets/campus_map_widget.dart` — Mapbox GL + GeoJSON zone overlays
 
 #### Tasks checklist
-- [ ] Render `/campus/map` zones/gates/landmarks on the Mapbox map (use `Zone.type` to color
-      polygons: parking vs venue vs road)
+- [ ] Render `/campus/map` zones/gates/landmarks on the Mapbox map (use `Zone.type` to
+      color polygons: parking vs venue vs road)
 - [ ] Landmark search → filters `Landmark[]` by name/category
-- [ ] Tapping a landmark routes to `NavigationScreen` with a basic route overlay (turn-by-turn
-      can be simplified to "draw a line to destination" for MVP)
+- [ ] Tapping a landmark → `NavigationScreen` with route overlay
 
-### 3. Driver flow — maps to "driver gets nearest available zone"
+### 3. Driver flow
 - `lib/services/parking_service.dart` — `GET /parking/zones`, `GET /parking/nearest`
 - `lib/services/location_service.dart` — Geolocator GPS stream
-- `lib/providers/parking_provider.dart` — REST-hydrated, later socket-updated
-- Screens: `driver_home_screen.dart`, `zone_list_screen.dart`, `route_to_zone_screen.dart`
 
 #### Tasks checklist
 - [ ] `ZoneStatusBadge` widget — green/amber/red for `AVAILABLE`/`LIMITED`/`FULL`
-- [ ] `driver_home_screen.dart` — map with zone overlays colored by current status
-- [ ] `zone_list_screen.dart` — list view, same data, sortable/filterable
-- [ ] "Find nearest" button → `GET /parking/nearest?lat=&lng=&landmarkId=` →
-      `route_to_zone_screen.dart`
+- [ ] `DriverHomeScreen` — map with zone overlays colored by current status
+- [ ] `ZoneListScreen` — list view with status badges
+- [ ] "Find nearest" button → `GET /parking/nearest?lat=&lng=` → `RouteToZoneScreen`
 
-### 4. Warden flow — maps to "warden marks zone full" + "warden broadcasts alert"
+### 4. Warden flow
 - Screens: `warden_dashboard_screen.dart`, `zone_update_screen.dart`,
   `broadcast_alert_screen.dart`, `incident_report_screen.dart`
-- `lib/services/alert_service.dart` — `/alerts/*`, `/wardens/*`
+- `lib/services/alert_service.dart`
 
 #### Tasks checklist
-- [ ] `zone_update_screen.dart` — one-tap `AVAILABLE`/`LIMITED`/`FULL` buttons →
-      `PATCH /parking/zones/:id/status`
-- [ ] `broadcast_alert_screen.dart` — form → `POST /alerts/broadcast`
-- [ ] `incident_report_screen.dart` — form (type, description, tap-to-set location) →
-      `POST /alerts/incident`
-- [ ] `warden_dashboard_screen.dart` — `GET /wardens/deployment` (ADMIN-only; can be a
-      lower-priority screen)
+- [ ] `ZoneUpdateScreen` — one-tap `AVAILABLE`/`LIMITED`/`FULL` → `PATCH /parking/zones/:id/status`
+- [ ] `BroadcastAlertScreen` — form → `POST /alerts/broadcast`
+- [ ] `IncidentReportScreen` — form → `POST /alerts/incident`
+- [ ] `WardenDashboardScreen` — `GET /wardens/deployment` (admin only; lower priority)
 
-### 5. Real-time layer — wire in last
-- `lib/services/socket_service.dart` — Socket.IO client, connects to `/parking` and
-  `/alerts` namespaces
-- Emits `subscribe:zones` / `subscribe:alerts` on connect
-- On `zone:status_updated` → update `parkingProvider` → map recolors
-- On `alert:broadcast` → `alertProvider` → `AlertBanner` widget shows on screen
-- `lib/widgets/alert_banner.dart` — dismissible top banner
+### 5. Real-time layer
+- `lib/services/socket_service.dart` — Socket.IO client connecting to `/parking` and `/alerts`
 
 #### Tasks checklist
-- [ ] Socket connects after login (needs JWT if the gateway requires auth — confirm with
-      Dipo whether `/parking` and `/alerts` sockets are gated or public)
-- [ ] `zone:status_updated` updates the same provider the REST `GET /parking/zones` call
-      hydrates, so UI doesn't need separate state for "live" vs "initial"
-- [ ] `alert:broadcast` → local push notification via `flutter_local_notifications`
+- [ ] Emit `subscribe:zones` / `subscribe:alerts` on connect
+- [ ] `zone:status_updated` → update `parkingProvider` → map recolors
+- [ ] `alert:broadcast` → `alertProvider` → `AlertBanner` widget
+- [ ] `alert:broadcast` → `flutter_local_notifications` push notification
+- [ ] Confirm with Dipo whether sockets require JWT on connect (pass via `socket.io` `auth`
+      option) or are public
 
 ---
 
@@ -324,17 +301,10 @@ Build in this order so each stage produces something demoable even if later stag
 
 - **Response envelope**: all backend responses are `{ success, message, data, error, timestamp }`.
   Tesals should unwrap `data` once in `ApiService`, not in every screen.
-- **Auth mechanism**: Praise should confirm early whether the JWT is returned as a JSON field
-  (`accessToken`) for the app to store, or set as an httpOnly cookie (fulltiime's pattern) —
-  Flutter apps generally can't read httpOnly cookies, so for a mobile client returning
-  `accessToken` in the response body is simpler. Document the final decision here once made.
-- **WebSocket auth**: decide whether `/parking` and `/alerts` namespaces require a JWT on
-  connect (pass via `socket.io` `auth` option) or are open — affects both Dipo's gateways and
-  Tesals's `socket_service.dart`.
-- **GeoJSON source of truth**: the `campus_geojson.json` asset (frontend) and the seeded
-  `Zone.geojson` / `Gate` / `Landmark` records (backend, Praise's seed script) must use the
-  same IDs and coordinates — coordinate directly on this rather than building both in
-  isolation.
+- **Auth**: JWT is returned as `accessToken` in the response body. Flutter stores it via
+  `flutter_secure_storage` and sends it as `Authorization: Bearer <token>` on every request.
+- **No ML microservice**: all recommendation logic lives in `src/recommendations/` inside the
+  NestJS backend. Dipo owns it.
 - **Running the backend locally**: `pnpm install` → `pnpm prisma:generate` →
-  `pnpm prisma:migrate` (requires Postgres matching `DATABASE_URL` in `.env`) →
-  `pnpm prisma:studio` (optional, for seed verification) → `pnpm start:dev`.
+  `pnpm prisma:migrate` → `pnpm prisma:seed` → `pnpm start:dev`
+- **Database**: Neon PostgreSQL (cloud). `DATABASE_URL` is in `.env` — share it with Dipo.

@@ -11,7 +11,6 @@ datasource db {
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
 enum Role {
-  VISITOR
   WARDEN
   ADMIN
 }
@@ -55,8 +54,9 @@ enum IncidentType {
 model User {
   id        String   @id @default(uuid())
   name      String
-  role      Role     @default(VISITOR)
-  pin       String? // bcrypt-hashed; wardens only
+  email     String   @unique
+  role      Role     @default(WARDEN)
+  password  String
   createdAt DateTime @default(now())
 
   zoneStatuses    ZoneStatus[]

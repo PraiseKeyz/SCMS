@@ -1,6 +1,6 @@
 # SCMS — Smart Campus Mobility System
-## Scaffold Plan for Coding Agent
-> Stack: NestJS (TypeScript) · Flutter (Dart) · FastAPI (Python/ML) · PostgreSQL · Prisma ORM · Socket.IO · Mapbox GL
+## Scaffold Plan
+> Stack: NestJS 11 (TypeScript) · Flutter (Dart) · PostgreSQL · Prisma ORM · Socket.IO · Mapbox GL
 
 ---
 
@@ -8,120 +8,135 @@
 
 ```
 scms/
-├── scms-backend/          # NestJS REST + WebSocket API
+├── backend/               # NestJS REST + WebSocket API
 ├── scms-app/              # Flutter mobile app
-├── scms-ml/               # FastAPI ML microservice
-└── docs/                  # This document + GeoJSON assets
+└── docs/                  # This document + team responsibilities
 ```
+
+> The FastAPI ML microservice originally planned has been replaced by a plain TypeScript
+> `recommendations` module inside the NestJS backend. No Python service needed.
 
 ---
 
-## 2. Backend — NestJS (`scms-backend/`)
+## 2. Backend — NestJS (`backend/`)
 
 ### 2.1 Folder Structure
 
 ```
-scms-backend/
+backend/
 ├── prisma/
-│   ├── schema.prisma                  # All models defined here
-│   └── seed.ts                        # Seed script: zones, gates, landmarks, warden accounts
+│   ├── schema.prisma
+│   ├── seed.ts
+│   └── migrations/
+│       └── 20260616222119_init_scms_schema/
+│           └── migration.sql
 │
-├── src/
-│   ├── main.ts                        # Bootstrap: enable CORS, Socket.IO adapter
-│   ├── app.module.ts                  # Root module
-│   │
-│   ├── prisma/
-│   │   ├── prisma.module.ts           # Global Prisma module
-│   │   └── prisma.service.ts          # PrismaClient wrapper (extends PrismaClient, onModuleInit/Destroy)
-│   │
-│   ├── config/
-│   │   └── configuration.ts           # Typed env config via @nestjs/config
-│   │
-│   ├── modules/
-│   │   ├── auth/
-│   │   │   ├── auth.module.ts
-│   │   │   ├── auth.controller.ts     # POST /auth/login, POST /auth/warden-login, GET /auth/me
-│   │   │   ├── auth.service.ts        # Validate credentials, sign JWT
-│   │   │   ├── jwt.strategy.ts        # Passport JWT strategy
-│   │   │   ├── jwt-auth.guard.ts      # Guard for protected routes
-│   │   │   └── dto/
-│   │   │       ├── login.dto.ts
-│   │   │       └── warden-login.dto.ts
-│   │   │
-│   │   ├── users/
-│   │   │   ├── users.module.ts
-│   │   │   ├── users.service.ts       # findById, findByPin, create
-│   │   │   └── dto/
-│   │   │       └── create-user.dto.ts
-│   │   │
-│   │   ├── campus/
-│   │   │   ├── campus.module.ts
-│   │   │   ├── campus.controller.ts   # GET /campus/map, /zones, /gates, /landmarks
-│   │   │   ├── campus.service.ts      # Read campus data from Prisma
-│   │   │   └── dto/
-│   │   │       └── campus-map.dto.ts  # Bundled response shape
-│   │   │
-│   │   ├── parking/
-│   │   │   ├── parking.module.ts
-│   │   │   ├── parking.controller.ts  # GET /parking/zones, PATCH /parking/zones/:id/status, GET /parking/nearest
-│   │   │   ├── parking.service.ts     # Zone status CRUD + nearest-zone logic (Haversine formula)
-│   │   │   ├── parking.gateway.ts     # @WebSocketGateway('/parking') — emit zone:status_updated
-│   │   │   └── dto/
-│   │   │       ├── update-zone-status.dto.ts
-│   │   │       └── nearest-zone-query.dto.ts
-│   │   │
-│   │   └── alerts/
-│   │       ├── alerts.module.ts
-│   │       ├── alerts.controller.ts   # POST /alerts/broadcast, POST /alerts/incident, GET /alerts/active, PATCH /alerts/incident/:id/resolve
-│   │       ├── alerts.service.ts
-│   │       ├── alerts.gateway.ts      # @WebSocketGateway('/alerts') — emit alert:broadcast
-│   │       ├── warden.controller.ts   # GET /wardens/deployment, POST /wardens/checkin
-│   │       └── dto/
-│   │           ├── broadcast-alert.dto.ts
-│   │           └── create-incident.dto.ts
-│   │
-│   └── common/
-│       ├── decorators/
-│       │   └── current-user.decorator.ts
-│       ├── guards/
-│       │   └── roles.guard.ts
-│       └── interceptors/
-│           └── transform.interceptor.ts   # Wrap all responses: { data, statusCode, timestamp }
+├── generated/
+│   └── prisma/            # Prisma Client output (gitignored)
 │
-├── .env.example
-├── nest-cli.json
-├── package.json
-└── tsconfig.json
+└── src/
+    ├── main.ts
+    ├── app.module.ts
+    ├── app.controller.ts  # GET /health (public)
+    ├── app.service.ts
+    │
+    ├── prisma/
+    │   ├── prisma.module.ts   # @Global()
+    │   └── prisma.service.ts
+    │
+    ├── auth/
+    │   ├── auth.module.ts
+    │   ├── auth.controller.ts
+    │   ├── auth.service.ts
+    │   ├── strategies/
+    │   │   └── jwt.strategy.ts
+    │   ├── guards/
+    │   │   ├── jwt-auth.guard.ts
+    │   │   └── roles.guard.ts
+    │   └── dto/
+    │       ├── login.dto.ts
+    │       └── change-password.dto.ts
+    │
+    ├── users/
+    │   ├── users.module.ts
+    │   ├── users.controller.ts
+    │   ├── users.service.ts
+    │   └── dto/
+    │       └── create-user.dto.ts
+    │
+    ├── campus/
+    │   ├── campus.module.ts
+    │   ├── campus.controller.ts
+    │   └── campus.service.ts
+    │
+    ├── parking/
+    │   ├── parking.module.ts
+    │   ├── parking.controller.ts
+    │   ├── parking.service.ts
+    │   ├── parking.gateway.ts
+    │   └── dto/
+    │       ├── update-zone-status.dto.ts
+    │       └── nearest-zone-query.dto.ts
+    │
+    ├── alerts/
+    │   ├── alerts.module.ts
+    │   ├── alerts.controller.ts
+    │   ├── alerts.service.ts
+    │   ├── alerts.gateway.ts
+    │   ├── warden.controller.ts
+    │   └── dto/
+    │       ├── broadcast-alert.dto.ts
+    │       └── create-incident.dto.ts
+    │
+    ├── recommendations/
+    │   ├── recommendations.module.ts
+    │   ├── recommendations.service.ts
+    │   └── utils/
+    │       └── geo.util.ts
+    │
+    └── common/
+        ├── constants/
+        │   └── safe-user.constant.ts    # SafeUserSelect + SafeUser type
+        ├── decorators/
+        │   ├── public.decorator.ts      # @Public()
+        │   ├── current-user.decorator.ts # @CurrentUser()
+        │   └── roles.decorator.ts       # @Roles(Role.WARDEN)
+        ├── filters/
+        │   └── http-exception.filter.ts
+        ├── interceptors/
+        │   └── transform.interceptor.ts
+        └── interfaces/
+            └── request-with-user.interface.ts
 ```
 
 ---
 
-### 2.2 Key Dependencies (`package.json`)
+### 2.2 Key Dependencies
 
 ```json
 {
   "dependencies": {
-    "@nestjs/common": "^10",
-    "@nestjs/core": "^10",
-    "@nestjs/platform-express": "^10",
-    "@nestjs/websockets": "^10",
-    "@nestjs/platform-socket.io": "^10",
-    "@nestjs/jwt": "^10",
-    "@nestjs/passport": "^10",
-    "@nestjs/config": "^3",
-    "@prisma/client": "^5",
-    "passport": "^0.7",
-    "passport-jwt": "^4",
-    "socket.io": "^4",
-    "class-validator": "^0.14",
+    "@nestjs/common": "^11",
+    "@nestjs/config": "^4",
+    "@nestjs/core": "^11",
+    "@nestjs/jwt": "^11",
+    "@nestjs/passport": "^11",
+    "@nestjs/platform-express": "^11",
+    "@nestjs/schedule": "^6",
+    "@nestjs/throttler": "^6",
+    "@prisma/client": "^6",
+    "argon2": "^0.44",
     "class-transformer": "^0.5",
-    "bcrypt": "^5"
+    "class-validator": "^0.15",
+    "compression": "^1",
+    "cookie-parser": "^1",
+    "passport": "^0.7",
+    "passport-jwt": "^4"
   },
   "devDependencies": {
-    "prisma": "^5",
-    "@types/bcrypt": "^5",
-    "@types/passport-jwt": "^4",
-    "ts-node": "^10",
+    "prisma": "^6",
+    "tsc-alias": "^1",
+    "tsx": "^4",
     "typescript": "^5"
   }
 }
@@ -134,6 +149,7 @@ scms-backend/
 ```prisma
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -142,7 +158,6 @@ datasource db {
 }
 
 enum Role {
-  VISITOR
   WARDEN
   ADMIN
 }
@@ -184,8 +199,9 @@ enum IncidentType {
 model User {
   id        String   @id @default(uuid())
   name      String
-  role      Role     @default(VISITOR)
-  pin       String?                        // bcrypt-hashed; wardens only
+  email     String   @unique
+  role      Role     @default(WARDEN)
+  password  String   // argon2-hashed
   createdAt DateTime @default(now())
 
   zoneStatuses    ZoneStatus[]
@@ -200,7 +216,7 @@ model Zone {
   label    String
   capacity Int
   type     ZoneType
-  geojson  Json                            // GeoJSON Polygon geometry
+  geojson  Json     // GeoJSON Polygon geometry
 
   statuses ZoneStatus[]
   checkins WardenCheckin[]
@@ -235,16 +251,16 @@ model ZoneStatus {
 }
 
 model BroadcastAlert {
-  id          String   @id @default(uuid())
-  message     String
+  id           String   @id @default(uuid())
+  message      String
   radiusMeters Int
-  centerLat   Decimal
-  centerLng   Decimal
-  createdBy   User     @relation(fields: [createdById], references: [id])
-  createdById String
-  expiresAt   DateTime
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  centerLat    Decimal
+  centerLng    Decimal
+  createdBy    User     @relation(fields: [createdById], references: [id])
+  createdById  String
+  expiresAt    DateTime
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
 }
 
 model Incident {
@@ -271,53 +287,79 @@ model WardenCheckin {
 
 ---
 
-### 2.4 PrismaService (`src/prisma/prisma.service.ts`)
+### 2.4 Response Envelope
 
-```typescript
-// Extend PrismaClient; connect on module init, disconnect on destroy
-// Mark as @Injectable() and register as @Global() module
-// Inject into any service with: constructor(private prisma: PrismaService)
+Every response — success or error — follows the same shape:
+
+**Success** (`TransformInterceptor`):
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": { "user": {}, "accessToken": "..." },
+  "error": null,
+  "timestamp": "2026-06-16T..."
+}
 ```
+
+**Error** (`HttpExceptionFilter`):
+```json
+{
+  "success": false,
+  "message": "Invalid credentials",
+  "data": null,
+  "error": { "statusCode": 401, "type": "UnauthorizedException", "details": null, "path": "/api/v1/auth/login" },
+  "timestamp": "2026-06-16T..."
+}
+```
+
+Controllers return `{ message?, data? }` — the interceptor wraps it. Never return a raw object.
 
 ---
 
 ### 2.5 REST API Endpoints
 
-#### Auth
-| Method | Path | Access | Description |
-|--------|------|--------|-------------|
-| POST | `/auth/login` | Public | Visitor login → JWT |
-| POST | `/auth/warden-login` | Public | Warden ID + PIN → JWT |
-| GET | `/auth/me` | JWT | Current user profile |
+All routes are prefixed `/api/v1/`.
 
-#### Campus
+#### Auth ✅
 | Method | Path | Access | Description |
 |--------|------|--------|-------------|
-| GET | `/campus/map` | Public | Full map bundle (zones + gates + landmarks) |
-| GET | `/campus/zones` | Public | All zones as GeoJSON FeatureCollection |
-| GET | `/campus/gates` | Public | All gates |
-| GET | `/campus/landmarks` | Public | All landmarks |
+| `POST` | `/auth/login` | Public | `{ email, password }` → `{ user, accessToken }` |
+| `GET` | `/auth/me` | JWT | Current user profile (no password field) |
+| `PATCH` | `/auth/change-password` | JWT | `{ currentPassword, newPassword }` |
 
-#### Parking
+#### Users ✅ (ADMIN only)
 | Method | Path | Access | Description |
 |--------|------|--------|-------------|
-| GET | `/parking/zones` | JWT | All parking zones with current status |
-| PATCH | `/parking/zones/:id/status` | WARDEN | Update zone status |
-| GET | `/parking/nearest?lat=&lng=&landmarkId=` | JWT | Nearest available zone (calls ML service internally) |
+| `POST` | `/users` | ADMIN | Create a warden or admin account |
+| `GET` | `/users` | ADMIN | List all users |
+| `GET` | `/users/:id` | ADMIN | Get a specific user |
+| `DELETE` | `/users/:id` | ADMIN | Remove a user |
 
-#### Alerts
+#### Campus ⬜
 | Method | Path | Access | Description |
 |--------|------|--------|-------------|
-| POST | `/alerts/broadcast` | WARDEN | Broadcast push alert |
-| POST | `/alerts/incident` | WARDEN | Log incident |
-| GET | `/alerts/active` | JWT | Active alerts |
-| PATCH | `/alerts/incident/:id/resolve` | WARDEN | Resolve incident |
+| `GET` | `/campus/map` | Public | Full map bundle (zones + gates + landmarks) |
+| `GET` | `/campus/zones` | Public | All zones as GeoJSON FeatureCollection |
+| `GET` | `/campus/gates` | Public | All gates |
+| `GET` | `/campus/landmarks` | Public | All landmarks |
 
-#### Wardens
+#### Parking ⬜
 | Method | Path | Access | Description |
 |--------|------|--------|-------------|
-| GET | `/wardens/deployment` | ADMIN | Active wardens + zone assignments |
-| POST | `/wardens/checkin` | WARDEN | Check in at a zone |
+| `GET` | `/parking/zones` | JWT | All parking zones with current status |
+| `PATCH` | `/parking/zones/:id/status` | WARDEN | Update zone status + emit socket event |
+| `GET` | `/parking/nearest?lat=&lng=` | JWT | Nearest available zone (heuristic scoring) |
+
+#### Alerts ⬜
+| Method | Path | Access | Description |
+|--------|------|--------|-------------|
+| `POST` | `/alerts/broadcast` | WARDEN | Broadcast alert + emit socket event |
+| `POST` | `/alerts/incident` | WARDEN | Log incident + emit socket event |
+| `GET` | `/alerts/active` | JWT | Active alerts (not expired) |
+| `PATCH` | `/alerts/incident/:id/resolve` | WARDEN | Resolve incident |
+| `GET` | `/wardens/deployment` | ADMIN | Active wardens + zone assignments |
+| `POST` | `/wardens/checkin` | WARDEN | Check in at a zone |
 
 ---
 
@@ -333,7 +375,7 @@ model WardenCheckin {
 | Direction | Event | Payload |
 |-----------|-------|---------|
 | Server → Client | `alert:broadcast` | `{ id, message, expiresAt }` |
-| Server → Client | `alert:incident` | `{ type, location }` — wardens/admin only |
+| Server → Client | `alert:incident` | `{ type, location }` |
 | Client → Server | `subscribe:alerts` | `{ lat, lng }` |
 
 ---
@@ -341,267 +383,52 @@ model WardenCheckin {
 ### 2.7 Environment Variables (`.env.example`)
 
 ```env
-DATABASE_URL=postgresql://user:password@localhost:5432/scms_db
-JWT_SECRET=your_jwt_secret_here
-JWT_EXPIRES_IN=7d
 PORT=3000
 NODE_ENV=development
-ML_SERVICE_URL=http://localhost:8000
-ALLOWED_ORIGINS=http://localhost:3000,http://10.0.2.2:3000
+DATABASE_URL=postgresql://user:password@host:5432/scms_db
+JWT_SECRET=change-this-in-production
+JWT_EXPIRES_IN=7d
+FRONTEND_URL=http://localhost:3000
 ```
 
 ---
 
-## 3. ML Microservice — FastAPI (`scms-ml/`)
+### 2.8 Guard Chain
 
-### 3.1 Purpose
-
-The ML service sits between the NestJS backend and the intelligence layer. It is called internally by NestJS — the Flutter app never talks to it directly.
-
-### 3.2 What It Does
-
-| Feature | Description |
-|---------|-------------|
-| **Smart Parking Recommendation** | Given a driver's lat/lng and destination landmark, returns ranked parking zones — factoring in current occupancy, historical fill patterns, and walking distance to the landmark |
-| **Crowd-Level ETA** | Given origin → destination + current zone occupancy data, returns estimated walking time with crowd multiplier (light / moderate / heavy) |
-| **Crowd Density Prediction** | Given an event type and time-of-day, predicts expected crowd density per zone for the next 1–2 hours |
-| **Incident Anomaly Detection** | Flags unusual spikes in zone occupancy updates or back-to-back incident reports from the same zone as anomalies — triggers an alert to ADMIN |
-
-### 3.3 Folder Structure
+Registered globally in `app.module.ts` via `APP_GUARD` in this order:
 
 ```
-scms-ml/
-├── app/
-│   ├── main.py                        # FastAPI entry, CORS, route registration
-│   ├── routers/
-│   │   ├── parking.py                 # POST /ml/parking/recommend
-│   │   ├── navigation.py              # POST /ml/navigation/eta
-│   │   ├── crowd.py                   # POST /ml/crowd/predict
-│   │   └── anomaly.py                 # POST /ml/anomaly/detect
-│   │
-│   ├── models/
-│   │   ├── parking_model.py           # Zone ranking logic (Haversine + occupancy weight)
-│   │   ├── eta_model.py               # ETA = base_time × crowd_multiplier
-│   │   ├── crowd_model.py             # Time-series zone density estimator
-│   │   └── anomaly_model.py           # Z-score anomaly detection on zone update frequency
-│   │
-│   ├── schemas/
-│   │   ├── parking_schema.py          # Pydantic request/response models
-│   │   ├── navigation_schema.py
-│   │   ├── crowd_schema.py
-│   │   └── anomaly_schema.py
-│   │
-│   └── utils/
-│       ├── geo.py                     # Haversine distance, bearing, bounding box helpers
-│       └── data_loader.py             # Load campus GeoJSON for spatial calculations
-│
-├── requirements.txt
-├── .env.example
-└── Dockerfile
+ThrottlerGuard → JwtAuthGuard → RolesGuard
 ```
+
+- Routes marked `@Public()` skip JWT verification entirely
+- All other routes require a valid Bearer token
+- Routes marked `@Roles(Role.WARDEN)` require that role — ADMIN always passes
+- Routes with no `@Roles(...)` decorator pass any authenticated user through
 
 ---
 
-### 3.4 API Endpoints
+## 3. Recommendations — TypeScript Heuristics (`src/recommendations/`)
 
-#### `POST /ml/parking/recommend`
-**Called by:** `parking.service.ts` → `GET /parking/nearest`
+All "ML" logic lives here as deterministic scoring functions. No external service.
 
-Request:
-```json
-{
-  "driver_lat": 6.4654,
-  "driver_lng": 3.4064,
-  "destination_landmark_id": "uuid",
-  "zone_statuses": [
-    { "zone_id": "uuid", "status": "AVAILABLE", "capacity": 200, "current_count": 80, "lat": 6.465, "lng": 3.407 }
-  ]
-}
-```
-Response:
-```json
-{
-  "recommended_zone_id": "uuid",
-  "ranked_zones": [
-    { "zone_id": "uuid", "score": 0.92, "walk_distance_m": 180, "occupancy_pct": 40 }
-  ]
-}
-```
-
-#### `POST /ml/navigation/eta`
-**Called by:** NestJS navigation route
-
-Request:
-```json
-{
-  "origin": { "lat": 6.4654, "lng": 3.4064 },
-  "destination": { "lat": 6.4660, "lng": 3.4071 },
-  "crowd_level": "moderate"
-}
-```
-Response:
-```json
-{
-  "estimated_seconds": 420,
-  "crowd_multiplier": 1.4,
-  "crowd_level": "moderate"
-}
-```
-
-#### `POST /ml/crowd/predict`
-**Called by:** NestJS on event start (cron or manual trigger)
-
-Request:
-```json
-{
-  "event_type": "HOLY_GHOST_CONGRESS",
-  "event_start_iso": "2025-10-10T18:00:00Z",
-  "hours_ahead": 2
-}
-```
-Response:
-```json
-{
-  "predictions": [
-    { "zone_id": "uuid", "predicted_density": "heavy", "confidence": 0.87 }
-  ]
-}
-```
-
-#### `POST /ml/anomaly/detect`
-**Called by:** NestJS periodically (every 5 min) or on zone update
-
-Request:
-```json
-{
-  "zone_id": "uuid",
-  "recent_update_timestamps": ["2025-10-10T18:00:00Z", "2025-10-10T18:00:45Z"]
-}
-```
-Response:
-```json
-{
-  "is_anomaly": true,
-  "reason": "Update frequency 8× above baseline",
-  "severity": "HIGH"
-}
-```
-
----
-
-### 3.5 ML Approach (MVP — No Training Data Needed)
-
-For the hackathon, all models use **rule-based + heuristic** logic that can be upgraded to trained models post-hackathon.
-
-| Model | MVP Approach | Post-Hack Upgrade |
-|-------|-------------|-------------------|
-| Parking Recommendation | Weighted score: 60% distance + 40% occupancy | Collaborative filtering on historical park choices |
-| ETA | Base walking speed (1.2 m/s) × crowd multiplier table | LSTM on real event crowd flow data |
-| Crowd Prediction | Lookup table by event type + time band | Time-series forecasting (Prophet / LSTM) |
-| Anomaly Detection | Z-score on update frequency per zone | Isolation Forest on multi-variate zone signals |
-
-### 3.6 Dependencies (`requirements.txt`)
-
-```
-fastapi==0.111.0
-uvicorn==0.30.0
-pydantic==2.7.0
-numpy==1.26.4
-scipy==1.13.0          # Z-score for anomaly detection
-python-dotenv==1.0.1
-httpx==0.27.0          # If ML service needs to call back to NestJS
-```
+| Function | Logic |
+|----------|-------|
+| `recommendParkingZone` | score = `0.6 × (1 − dist) + 0.4 × (1 − occupancy)` |
+| `estimateEta` | base 1.2 m/s × crowd multiplier (`light: 1.0, moderate: 1.4, heavy: 1.9`) |
+| `predictCrowd` | lookup table by event type + time band |
+| `detectAnomaly` | Z-score on zone update frequency; return `{ isAnomaly, reason, severity }` |
 
 ---
 
 ## 4. Frontend — Flutter (`scms-app/`)
 
-### 4.1 Folder Structure
-
-```
-scms-app/
-├── pubspec.yaml
-├── lib/
-│   ├── main.dart                          # App entry, theme, router setup
-│   │
-│   ├── core/
-│   │   ├── constants.dart                 # API base URL, Mapbox token, zone colours
-│   │   ├── theme.dart                     # Colour palette, text styles
-│   │   ├── router.dart                    # GoRouter route definitions
-│   │   └── di.dart                        # Service locator (get_it)
-│   │
-│   ├── models/
-│   │   ├── user.dart
-│   │   ├── zone.dart                      # Zone + ZoneStatus enum (AVAILABLE, LIMITED, FULL)
-│   │   ├── gate.dart
-│   │   ├── landmark.dart
-│   │   ├── alert.dart
-│   │   └── incident.dart
-│   │
-│   ├── services/
-│   │   ├── api_service.dart               # Dio HTTP client + auth header interceptor
-│   │   ├── auth_service.dart              # Login, warden login, JWT storage (flutter_secure_storage)
-│   │   ├── campus_service.dart            # Fetch campus map bundle
-│   │   ├── parking_service.dart           # Zone statuses, update status, nearest zone
-│   │   ├── alert_service.dart             # Alerts, incidents
-│   │   ├── socket_service.dart            # Socket.IO client (connect, subscribe, listen)
-│   │   └── location_service.dart          # Geolocator GPS stream
-│   │
-│   ├── providers/                         # Riverpod state
-│   │   ├── auth_provider.dart             # Auth state (current user, login, logout)
-│   │   ├── campus_provider.dart           # Campus map data (cached FutureProvider)
-│   │   ├── parking_provider.dart          # Zone statuses — REST hydrated + socket live-updated
-│   │   └── alert_provider.dart            # Active alerts — socket live-updated
-│   │
-│   ├── screens/
-│   │   ├── splash/
-│   │   │   └── splash_screen.dart         # Auth check → route to login or home
-│   │   │
-│   │   ├── auth/
-│   │   │   ├── role_select_screen.dart    # Visitor / Driver / Warden picker
-│   │   │   ├── visitor_login_screen.dart  # Optional (guest access allowed)
-│   │   │   └── warden_login_screen.dart   # Warden ID + PIN
-│   │   │
-│   │   ├── visitor/
-│   │   │   ├── visitor_home_screen.dart   # Campus map + landmark search bar
-│   │   │   ├── landmark_search_screen.dart
-│   │   │   └── navigation_screen.dart     # Turn-by-turn overlay on Mapbox map
-│   │   │
-│   │   ├── driver/
-│   │   │   ├── driver_home_screen.dart    # Map with parking zone overlays + status colours
-│   │   │   ├── zone_list_screen.dart      # List view of zones with status badges
-│   │   │   └── route_to_zone_screen.dart  # Routed path to recommended zone
-│   │   │
-│   │   └── warden/
-│   │       ├── warden_dashboard_screen.dart
-│   │       ├── zone_update_screen.dart    # One-tap AVAILABLE / LIMITED / FULL
-│   │       ├── broadcast_alert_screen.dart
-│   │       └── incident_report_screen.dart
-│   │
-│   └── widgets/
-│       ├── campus_map_widget.dart         # Mapbox GL + GeoJSON zone overlays
-│       ├── zone_status_badge.dart         # Green / Amber / Red chip
-│       ├── alert_banner.dart              # Dismissable top-of-screen alert
-│       ├── landmark_card.dart
-│       └── warden_zone_tile.dart          # Zone row + one-tap status buttons
-│
-└── assets/
-    ├── map/
-    │   └── campus_geojson.json            # Hand-traced Redemption City GeoJSON
-    └── icons/
-```
-
----
-
-### 4.2 Key Dependencies (`pubspec.yaml`)
+### 4.1 Key Dependencies (`pubspec.yaml`)
 
 ```yaml
 dependencies:
-  flutter:
-    sdk: flutter
   go_router: ^13.0.0
   flutter_riverpod: ^2.5.0
-  riverpod_annotation: ^2.3.0
   dio: ^5.4.0
   socket_io_client: ^2.0.3
   mapbox_maps_flutter: ^2.0.0
@@ -618,13 +445,20 @@ dev_dependencies:
   riverpod_generator: ^2.4.0
 ```
 
----
+### 4.2 Auth Flow
+
+1. App launches → `SplashScreen` checks `flutter_secure_storage` for token
+2. No token → `RoleSelectScreen` (Visitor = anonymous, Staff = login)
+3. Staff picks login → `LoginScreen` — email + password form → `POST /auth/login`
+4. On success → store `accessToken`, decode role from JWT, route to appropriate home screen
+5. All subsequent Dio requests attach `Authorization: Bearer <token>` automatically
 
 ### 4.3 App Navigation (GoRouter)
 
 ```
 /                            → SplashScreen
 /role-select                 → RoleSelectScreen
+/login                       → LoginScreen (warden + admin)
 /visitor
   /home                      → VisitorHomeScreen
   /search                    → LandmarkSearchScreen
@@ -634,79 +468,57 @@ dev_dependencies:
   /zones                     → ZoneListScreen
   /route/:zoneId             → RouteToZoneScreen
 /warden
-  /login                     → WardenLoginScreen
   /dashboard                 → WardenDashboardScreen
   /zone-update               → ZoneUpdateScreen
   /broadcast                 → BroadcastAlertScreen
   /incident                  → IncidentReportScreen
 ```
 
----
-
 ### 4.4 Real-Time Flow
 
-1. App launches → connects to `/parking` and `/alerts` Socket.IO namespaces
-2. Emits `subscribe:zones` and `subscribe:alerts` with current GPS coords
+1. App connects to `/parking` and `/alerts` Socket.IO namespaces after login
+2. Emits `subscribe:zones` and `subscribe:alerts`
 3. `zone:status_updated` → `parkingProvider` updates → map zone recolours instantly
-4. `alert:broadcast` → `alertProvider` adds alert → `AlertBanner` appears on screen
+4. `alert:broadcast` → `alertProvider` adds alert → `AlertBanner` + push notification
 
 ---
 
-## 5. GeoJSON Campus Map (`assets/map/campus_geojson.json`)
+## 5. Campus Coordinates
 
-Hand-trace from satellite imagery at **6.4654° N, 3.4064° E** using [geojson.io](https://geojson.io).
+Campus center: **6.8259° N, 3.4628° E** (Redemption City, Lagos-Ibadan Expressway, Ogun State)
 
-### Required Feature Layers
-
-| Layer | Geometry | Required Properties |
-|-------|----------|---------------------|
-| Parking zones | Polygon | `id`, `name`, `label`, `capacity`, `type: "PARKING"` |
-| Venue zones | Polygon | `id`, `name`, `type: "VENUE"` |
-| Roads / paths | LineString | `id`, `name`, `type: "ROAD"`, `accessible: true/false` |
-| Gates | Point | `id`, `name`, `direction: "ENTRY/EXIT/BOTH"` |
-| Landmarks | Point | `id`, `name`, `category`, `accessible: true/false` |
+All zone/gate/landmark coordinates in the seed script are approximate placeholders around
+this confirmed location. No manual GeoJSON tracing required — data is fetched from the
+database via `GET /campus/map`.
 
 ---
 
-## 6. Service Communication Map
-
-```
-Flutter App
-    │
-    ├──[REST + JWT]──────────────→ NestJS Backend (port 3000)
-    │                                   │
-    └──[Socket.IO]───────────────→      ├──[Prisma]──→ PostgreSQL
-                                        │
-                                        └──[HTTP]────→ FastAPI ML Service (port 8000)
-```
-
-The Flutter app **never** calls the ML service directly. NestJS proxies all ML calls internally.
-
----
-
-## 7. MVP Success Criteria Mapping
+## 6. MVP Success Criteria
 
 | Hackathon Criterion | Implementation |
 |---------------------|----------------|
-| Visitor navigates gate → landmark | `NavigationScreen` + Mapbox directions + campus GeoJSON |
-| Warden marks zone Full → map updates in <5s | `PATCH /parking/zones/:id/status` → `zone:status_updated` socket → `parkingProvider` → map recolour |
-| Driver gets nearest available zone | `GET /parking/nearest` → NestJS calls `POST /ml/parking/recommend` → `RouteToZoneScreen` |
+| Visitor navigates gate → landmark | `NavigationScreen` + Mapbox + `/campus/map` data |
+| Warden marks zone Full → map updates in <5s | `PATCH /parking/zones/:id/status` → `zone:status_updated` socket → `parkingProvider` → recolour |
+| Driver gets nearest available zone | `GET /parking/nearest` → `RecommendationsService` → `RouteToZoneScreen` |
 | Warden broadcasts alert → push notification | `POST /alerts/broadcast` → `alert:broadcast` socket → `flutter_local_notifications` |
 
 ---
 
-## 8. Recommended Build Order
+## 7. Build Order
 
-1. **DB + Prisma** — run `prisma migrate dev`, seed zones/gates/landmarks
-2. **NestJS auth + campus endpoints** — login, JWT guard, campus map routes
-3. **NestJS parking endpoints + WebSocket gateway** — zone status CRUD + socket emit
-4. **NestJS alerts endpoints + gateway** — broadcast + incident
-5. **FastAPI ML service** — `/recommend` and `/eta` endpoints (heuristic logic first)
-6. **Flutter core** — API service, auth flow, Mapbox map with GeoJSON overlay
-7. **Visitor flow** — landmark search + navigation screen
-8. **Driver flow** — zone overlay + live colours + nearest zone route
-9. **Warden flow** — zone update + broadcast + incident form
-10. **End-to-end demo run** — test all 4 success criteria live
+1. ✅ DB + Prisma — schema migrated, seed data in Neon
+2. ✅ Auth module — login, JWT guard, change-password
+3. ✅ Users module — CRUD (ADMIN only)
+4. ⬜ Campus module — map bundle endpoints
+5. ⬜ Parking module — zone status CRUD + WebSocket gateway
+6. ⬜ Alerts module — broadcast + incident + warden checkin
+7. ⬜ Recommendations module — heuristic scoring functions
+8. ⬜ Flutter core — API service, auth flow, Mapbox map
+9. ⬜ Flutter visitor flow — landmark search + navigation
+10. ⬜ Flutter driver flow — zone overlay + nearest zone
+11. ⬜ Flutter warden flow — zone update + broadcast + incident
+12. ⬜ Flutter real-time layer — Socket.IO integration
+13. ⬜ End-to-end demo run
 
 ---
 
