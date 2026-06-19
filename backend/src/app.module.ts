@@ -10,6 +10,9 @@ import { AuthModule } from './auth/auth.module.js';
 import { UsersModule } from './users/users.module.js';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard.js';
 import { RolesGuard } from './auth/guards/roles.guard.js';
+import { ParkingModule } from './parking/parking.module.js';
+import { AlertsModule } from './alerts/alerts.module.js';
+import { RecommendationsModule } from './recommendations/recommendations.module.js';
 
 @Module({
   imports: [
@@ -25,6 +28,9 @@ import { RolesGuard } from './auth/guards/roles.guard.js';
     PrismaModule,
     AuthModule,
     UsersModule,
+    ParkingModule,
+    AlertsModule,
+    RecommendationsModule,
   ],
   controllers: [AppController],
   providers: [
