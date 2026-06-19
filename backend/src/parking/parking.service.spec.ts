@@ -36,7 +36,15 @@ describe('ParkingService', () => {
   describe('getZonesWithStatus', () => {
     it('defaults to AVAILABLE if no statuses exist', async () => {
       jest.spyOn(prisma.zone, 'findMany').mockResolvedValue([
-        { id: '1', name: 'Z1', label: 'Z1', capacity: 10, type: 'PARKING', geojson: {}, statuses: [] } as any,
+        {
+          id: '1',
+          name: 'Z1',
+          label: 'Z1',
+          capacity: 10,
+          type: 'PARKING',
+          geojson: {},
+          statuses: [],
+        } as any,
       ]);
       const result = await service.getZonesWithStatus();
       expect(result[0].status).toBe(ZoneStatusEnum.AVAILABLE);
@@ -46,7 +54,9 @@ describe('ParkingService', () => {
   describe('updateZoneStatus', () => {
     it('throws NotFoundException if zone does not exist', async () => {
       jest.spyOn(prisma.zone, 'findUnique').mockResolvedValue(null);
-      await expect(service.updateZoneStatus('invalid', ZoneStatusEnum.FULL, 'user')).rejects.toThrow(NotFoundException);
+      await expect(
+        service.updateZoneStatus('invalid', ZoneStatusEnum.FULL, 'user'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

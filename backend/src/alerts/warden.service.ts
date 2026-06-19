@@ -22,7 +22,11 @@ export class WardenService {
         id: true,
         name: true,
         email: true,
-        checkins: { orderBy: { checkedIn: 'desc' }, take: 1, include: { zone: true } },
+        checkins: {
+          orderBy: { checkedIn: 'desc' },
+          take: 1,
+          include: { zone: true },
+        },
       },
     });
 

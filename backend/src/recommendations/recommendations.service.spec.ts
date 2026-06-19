@@ -1,5 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { RecommendationsService, ZoneCandidate } from './recommendations.service';
+import {
+  RecommendationsService,
+  ZoneCandidate,
+} from './recommendations.service';
 import { BadRequestException } from '@nestjs/common';
 
 describe('RecommendationsService', () => {
@@ -15,7 +18,11 @@ describe('RecommendationsService', () => {
 
   describe('recommendParkingZone', () => {
     it('returns empty when zones array is empty', () => {
-      const result = service.recommendParkingZone({ driverLat: 0, driverLng: 0, zones: [] });
+      const result = service.recommendParkingZone({
+        driverLat: 0,
+        driverLng: 0,
+        zones: [],
+      });
       expect(result.recommendedZoneId).toBeNull();
       expect(result.rankedZones.length).toBe(0);
     });
@@ -25,7 +32,11 @@ describe('RecommendationsService', () => {
         { zoneId: 'zone1', lat: 1, lng: 1, status: 'FULL' },
         { zoneId: 'zone2', lat: 2, lng: 2, status: 'FULL' },
       ];
-      const result = service.recommendParkingZone({ driverLat: 0, driverLng: 0, zones });
+      const result = service.recommendParkingZone({
+        driverLat: 0,
+        driverLng: 0,
+        zones,
+      });
       expect(result.recommendedZoneId).toBeDefined();
       expect(result.rankedZones.length).toBe(2);
     });
@@ -35,7 +46,11 @@ describe('RecommendationsService', () => {
         { zoneId: 'zoneB', lat: 1, lng: 1, status: 'AVAILABLE' },
         { zoneId: 'zoneA', lat: 1, lng: 1, status: 'AVAILABLE' },
       ];
-      const result = service.recommendParkingZone({ driverLat: 0, driverLng: 0, zones });
+      const result = service.recommendParkingZone({
+        driverLat: 0,
+        driverLng: 0,
+        zones,
+      });
       expect(result.rankedZones[0].zoneId).toBe('zoneA');
       expect(result.rankedZones[1].zoneId).toBe('zoneB');
     });
@@ -45,7 +60,11 @@ describe('RecommendationsService', () => {
         { zoneId: 'far', lat: 10, lng: 10, status: 'AVAILABLE' },
         { zoneId: 'near', lat: 1, lng: 1, status: 'AVAILABLE' },
       ];
-      const result = service.recommendParkingZone({ driverLat: 0, driverLng: 0, zones });
+      const result = service.recommendParkingZone({
+        driverLat: 0,
+        driverLng: 0,
+        zones,
+      });
       expect(result.recommendedZoneId).toBe('near');
       expect(result.rankedZones[0].zoneId).toBe('near');
     });
@@ -55,11 +74,23 @@ describe('RecommendationsService', () => {
     it('calculates monotonically increasing ETAs with crowd levels', () => {
       const origin = { lat: 0, lng: 0 };
       const destination = { lat: 1, lng: 1 };
-      
-      const lightEta = service.estimateEta({ origin, destination, crowdLevel: 'light' }).etaSeconds;
-      const moderateEta = service.estimateEta({ origin, destination, crowdLevel: 'moderate' }).etaSeconds;
-      const heavyEta = service.estimateEta({ origin, destination, crowdLevel: 'heavy' }).etaSeconds;
-      
+
+      const lightEta = service.estimateEta({
+        origin,
+        destination,
+        crowdLevel: 'light',
+      }).etaSeconds;
+      const moderateEta = service.estimateEta({
+        origin,
+        destination,
+        crowdLevel: 'moderate',
+      }).etaSeconds;
+      const heavyEta = service.estimateEta({
+        origin,
+        destination,
+        crowdLevel: 'heavy',
+      }).etaSeconds;
+
       expect(lightEta).toBeLessThan(moderateEta);
       expect(moderateEta).toBeLessThan(heavyEta);
     });
@@ -68,7 +99,11 @@ describe('RecommendationsService', () => {
       const origin = { lat: 0, lng: 0 };
       const destination = { lat: 1, lng: 1 };
       expect(() => {
-        service.estimateEta({ origin, destination, crowdLevel: 'invalid' as any });
+        service.estimateEta({
+          origin,
+          destination,
+          crowdLevel: 'invalid' as any,
+        });
       }).toThrow(BadRequestException);
     });
   });
@@ -76,7 +111,10 @@ describe('RecommendationsService', () => {
   describe('detectAnomaly', () => {
     it('returns false when fewer than 4 timestamps', () => {
       const timestamps = [new Date(), new Date(), new Date()];
-      const result = service.detectAnomaly({ zoneId: 'z1', recentUpdateTimestamps: timestamps });
+      const result = service.detectAnomaly({
+        zoneId: 'z1',
+        recentUpdateTimestamps: timestamps,
+      });
       expect(result.isAnomaly).toBe(false);
     });
 
@@ -89,7 +127,10 @@ describe('RecommendationsService', () => {
         new Date(now + 3000),
         new Date(now + 4000), // All exactly 1000ms apart
       ];
-      const result = service.detectAnomaly({ zoneId: 'z1', recentUpdateTimestamps: timestamps });
+      const result = service.detectAnomaly({
+        zoneId: 'z1',
+        recentUpdateTimestamps: timestamps,
+      });
       expect(result.isAnomaly).toBe(false); // No anomaly because exactly the mean, z-score is 0
     });
 
@@ -102,7 +143,10 @@ describe('RecommendationsService', () => {
         new Date(now + 3000),
         new Date(now + 1000000), // Huge gap
       ];
-      const result = service.detectAnomaly({ zoneId: 'z1', recentUpdateTimestamps: timestamps });
+      const result = service.detectAnomaly({
+        zoneId: 'z1',
+        recentUpdateTimestamps: timestamps,
+      });
       expect(result.isAnomaly).toBe(true);
       expect(result.severity).toBeDefined();
     });

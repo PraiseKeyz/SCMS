@@ -16,7 +16,11 @@ export class ParkingGateway {
     client.join('zones');
   }
 
-  emitZoneStatusUpdated(payload: { zoneId: string; status: string; updatedAt: Date }) {
+  emitZoneStatusUpdated(payload: {
+    zoneId: string;
+    status: string;
+    updatedAt: Date;
+  }) {
     this.server.to('zones').emit('zone:status_updated', payload);
   }
 }

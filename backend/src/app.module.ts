@@ -19,11 +19,13 @@ import { RecommendationsModule } from './recommendations/recommendations.module.
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
 
-    ThrottlerModule.forRoot([{
-      name: 'global',
-      ttl: 60000,
-      limit: 120,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        name: 'global',
+        ttl: 60000,
+        limit: 120,
+      },
+    ]),
 
     PrismaModule,
     AuthModule,

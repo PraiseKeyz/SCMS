@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AlertsGateway } from './alerts.gateway';
 import { BroadcastAlertDto } from './dto/broadcast-alert.dto';
@@ -46,6 +50,9 @@ export class AlertsService {
     if (!incident) throw new NotFoundException('Incident not found');
     if (incident.resolved) return incident;
 
-    return this.prisma.incident.update({ where: { id }, data: { resolved: true } });
+    return this.prisma.incident.update({
+      where: { id },
+      data: { resolved: true },
+    });
   }
 }

@@ -24,13 +24,20 @@ export class ParkingController {
     @Body() dto: UpdateZoneStatusDto,
     @CurrentUser() user: SafeUser,
   ) {
-    const status = await this.parkingService.updateZoneStatus(id, dto.status, user.id);
+    const status = await this.parkingService.updateZoneStatus(
+      id,
+      dto.status,
+      user.id,
+    );
     return { message: 'Zone status updated', data: { status } };
   }
 
   @Get('nearest')
   async nearest(@Query() query: NearestZoneQueryDto) {
-    const result = await this.parkingService.getNearestZone(query.lat, query.lng);
+    const result = await this.parkingService.getNearestZone(
+      query.lat,
+      query.lng,
+    );
     return { message: 'Nearest zone calculated', data: result };
   }
 }

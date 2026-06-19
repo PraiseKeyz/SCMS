@@ -16,7 +16,11 @@ describe('AlertsService', () => {
           provide: PrismaService,
           useValue: {
             broadcastAlert: { create: jest.fn(), findMany: jest.fn() },
-            incident: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
+            incident: {
+              create: jest.fn(),
+              findUnique: jest.fn(),
+              update: jest.fn(),
+            },
           },
         },
         {
@@ -33,22 +37,34 @@ describe('AlertsService', () => {
   describe('broadcast', () => {
     it('throws BadRequestException if expiresAt is in the past', async () => {
       const pastDate = new Date(Date.now() - 10000).toISOString();
-      await expect(service.broadcast({ message: 'test', radiusMeters: 10, centerLat: 0, centerLng: 0, expiresAt: pastDate }, 'user'))
-        .rejects.toThrow(BadRequestException);
+      await expect(
+        service.broadcast(
+          {
+            message: 'test',
+            radiusMeters: 10,
+            centerLat: 0,
+            centerLng: 0,
+            expiresAt: pastDate,
+          },
+          'user',
+        ),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
   describe('resolveIncident', () => {
     it('throws NotFoundException if incident not found', async () => {
       jest.spyOn(prisma.incident, 'findUnique').mockResolvedValue(null);
-      await expect(service.resolveIncident('invalid')).rejects.toThrow(NotFoundException);
+      await expect(service.resolveIncident('invalid')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('returns incident immediately if already resolved (idempotent)', async () => {
       const incident = { id: '1', resolved: true } as any;
       jest.spyOn(prisma.incident, 'findUnique').mockResolvedValue(incident);
       const updateSpy = jest.spyOn(prisma.incident, 'update');
-      
+
       const result = await service.resolveIncident('1');
       expect(result).toEqual(incident);
       expect(updateSpy).not.toHaveBeenCalled();

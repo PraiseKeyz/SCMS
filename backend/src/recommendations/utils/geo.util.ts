@@ -27,7 +27,10 @@ export function haversineDistanceMeters(a: LatLng, b: LatLng): number {
 export function polygonCentroid(geojson: any): LatLng {
   const ring: [number, number][] = geojson?.coordinates?.[0] ?? [];
   if (!ring.length) {
-    Logger.warn('polygonCentroid received missing or malformed geojson', 'GeoUtil');
+    Logger.warn(
+      'polygonCentroid received missing or malformed geojson',
+      'GeoUtil',
+    );
     return { lat: 0, lng: 0 };
   }
 

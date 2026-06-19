@@ -13,14 +13,20 @@ export class AlertsController {
 
   @Post('broadcast')
   @Roles(Role.WARDEN)
-  async broadcast(@Body() dto: BroadcastAlertDto, @CurrentUser() user: SafeUser) {
+  async broadcast(
+    @Body() dto: BroadcastAlertDto,
+    @CurrentUser() user: SafeUser,
+  ) {
     const alert = await this.alertsService.broadcast(dto, user.id);
     return { message: 'Alert broadcast', data: { alert } };
   }
 
   @Post('incident')
   @Roles(Role.WARDEN)
-  async createIncident(@Body() dto: CreateIncidentDto, @CurrentUser() user: SafeUser) {
+  async createIncident(
+    @Body() dto: CreateIncidentDto,
+    @CurrentUser() user: SafeUser,
+  ) {
     const incident = await this.alertsService.createIncident(dto, user.id);
     return { message: 'Incident logged', data: { incident } };
   }

@@ -13,7 +13,10 @@ export class AlertsGateway {
   server: Server;
 
   @SubscribeMessage('subscribe:alerts')
-  handleSubscribe(@ConnectedSocket() client: Socket, @MessageBody() _body: { lat: number; lng: number }) {
+  handleSubscribe(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() _body: { lat: number; lng: number },
+  ) {
     // Radius filtering by lat/lng is a possible v2 — for the hackathon demo,
     // broadcast to everyone subscribed and let the client filter by distance.
     client.join('alerts');
@@ -23,7 +26,11 @@ export class AlertsGateway {
     this.server.to('alerts').emit('alert:broadcast', alert);
   }
 
-  emitIncident(incident: { type: string; latitude: number; longitude: number }) {
+  emitIncident(incident: {
+    type: string;
+    latitude: number;
+    longitude: number;
+  }) {
     this.server.to('alerts').emit('alert:incident', {
       type: incident.type,
       location: { lat: incident.latitude, lng: incident.longitude },

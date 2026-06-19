@@ -28,7 +28,9 @@ describe('WardenService', () => {
   describe('checkin', () => {
     it('throws NotFoundException if zone does not exist', async () => {
       jest.spyOn(prisma.zone, 'findUnique').mockResolvedValue(null);
-      await expect(service.checkin('user1', 'invalid')).rejects.toThrow(NotFoundException);
+      await expect(service.checkin('user1', 'invalid')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

@@ -30,7 +30,11 @@ export class ParkingService {
     }));
   }
 
-  async updateZoneStatus(zoneId: string, status: ZoneStatusEnum, updatedById: string) {
+  async updateZoneStatus(
+    zoneId: string,
+    status: ZoneStatusEnum,
+    updatedById: string,
+  ) {
     const zone = await this.prisma.zone.findUnique({ where: { id: zoneId } });
     if (!zone) throw new NotFoundException(`Zone with ID ${zoneId} not found`);
 
@@ -55,7 +59,7 @@ export class ParkingService {
       .map((z) => ({
         zoneId: z.id,
         ...polygonCentroid(z.geojson),
-        status: z.status as 'AVAILABLE' | 'LIMITED' | 'FULL',
+        status: z.status,
       }));
 
     return this.recommendations.recommendParkingZone({

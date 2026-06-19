@@ -28,7 +28,10 @@ const BASE_WALK_SPEED_MPS = 1.2;
 
 // Rough campus-pattern defaults for the demo — replace with real numbers if
 // you get attendance/timetable data before judging.
-const CROWD_LOOKUP: Record<string, Record<string, keyof typeof CROWD_MULTIPLIER>> = {
+const CROWD_LOOKUP: Record<
+  string,
+  Record<string, keyof typeof CROWD_MULTIPLIER>
+> = {
   classes: { morning: 'heavy', afternoon: 'moderate', evening: 'light' },
   exam: { morning: 'heavy', afternoon: 'heavy', evening: 'moderate' },
   event: { morning: 'moderate', afternoon: 'heavy', evening: 'heavy' },
@@ -49,9 +52,7 @@ export class RecommendationsService {
       return { recommendedZoneId: null, rankedZones: [] };
     }
 
-    const pool = excludeFull
-      ? zones.filter((z) => z.status !== 'FULL')
-      : zones;
+    const pool = excludeFull ? zones.filter((z) => z.status !== 'FULL') : zones;
     const candidates = pool.length ? pool : zones; // fallback if everything's full
 
     const withDistance = candidates.map((z) => ({
@@ -101,14 +102,21 @@ export class RecommendationsService {
     const multiplier = CROWD_MULTIPLIER[input.crowdLevel];
     const etaSeconds = (distance / BASE_WALK_SPEED_MPS) * multiplier;
 
-    return { distanceM: Math.round(distance), etaSeconds: Math.round(etaSeconds) };
+    return {
+      distanceM: Math.round(distance),
+      etaSeconds: Math.round(etaSeconds),
+    };
   }
 
   predictCrowd(input: { eventType: string; hoursAhead: number }): {
     crowdLevel: keyof typeof CROWD_MULTIPLIER;
   } {
     const band =
-      input.hoursAhead < 6 ? 'morning' : input.hoursAhead < 14 ? 'afternoon' : 'evening';
+      input.hoursAhead < 6
+        ? 'morning'
+        : input.hoursAhead < 14
+          ? 'afternoon'
+          : 'evening';
 
     const table = CROWD_LOOKUP[input.eventType] ?? CROWD_LOOKUP.none;
     return { crowdLevel: table[band] };
@@ -144,7 +152,12 @@ export class RecommendationsService {
       return { isAnomaly: false, reason: null, severity: null };
     }
 
-    const severity = Math.abs(zScore) > 3.5 ? 'high' : Math.abs(zScore) > 2.5 ? 'medium' : 'low';
+    const severity =
+      Math.abs(zScore) > 3.5
+        ? 'high'
+        : Math.abs(zScore) > 2.5
+          ? 'medium'
+          : 'low';
     const reason =
       zScore < 0
         ? 'Zone status updating far more frequently than usual'
