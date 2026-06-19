@@ -32,7 +32,10 @@ export class AuthService {
       role: safeUser.role,
     });
 
-    return { message: 'Login successful', data: { user: safeUser, accessToken } };
+    return {
+      message: 'Login successful',
+      data: { user: safeUser, accessToken },
+    };
   }
 
   getMe(user: SafeUser) {
@@ -48,7 +51,8 @@ export class AuthService {
     if (!record) throw new UnauthorizedException();
 
     const currentValid = await verify(record.password, dto.currentPassword);
-    if (!currentValid) throw new UnauthorizedException('Current password is incorrect');
+    if (!currentValid)
+      throw new UnauthorizedException('Current password is incorrect');
 
     const hashedPassword = await hash(dto.newPassword);
     await this.prisma.user.update({

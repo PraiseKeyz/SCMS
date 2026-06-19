@@ -13,13 +13,21 @@ export class UsersService {
   }
 
   findById(id: string) {
-    return this.prisma.user.findUnique({ where: { id }, select: SafeUserSelect });
+    return this.prisma.user.findUnique({
+      where: { id },
+      select: SafeUserSelect,
+    });
   }
 
   async create(dto: CreateUserDto) {
     const hashedPassword = await hash(dto.password);
     return this.prisma.user.create({
-      data: { name: dto.name, email: dto.email, role: dto.role, password: hashedPassword },
+      data: {
+        name: dto.name,
+        email: dto.email,
+        role: dto.role,
+        password: hashedPassword,
+      },
       select: SafeUserSelect,
     });
   }

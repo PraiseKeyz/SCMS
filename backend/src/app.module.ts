@@ -10,21 +10,29 @@ import { AuthModule } from './auth/auth.module.js';
 import { UsersModule } from './users/users.module.js';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard.js';
 import { RolesGuard } from './auth/guards/roles.guard.js';
+import { ParkingModule } from './parking/parking.module.js';
+import { AlertsModule } from './alerts/alerts.module.js';
+import { RecommendationsModule } from './recommendations/recommendations.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
 
-    ThrottlerModule.forRoot([{
-      name: 'global',
-      ttl: 60000,
-      limit: 120,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        name: 'global',
+        ttl: 60000,
+        limit: 120,
+      },
+    ]),
 
     PrismaModule,
     AuthModule,
     UsersModule,
+    ParkingModule,
+    AlertsModule,
+    RecommendationsModule,
   ],
   controllers: [AppController],
   providers: [

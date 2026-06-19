@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Delete, Body, Param, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  NotFoundException,
+} from '@nestjs/common';
 import { Roles } from '@/common/decorators/roles.decorator.js';
 import { Role } from '../../generated/prisma/index.js';
 import { UsersService } from './users.service.js';
