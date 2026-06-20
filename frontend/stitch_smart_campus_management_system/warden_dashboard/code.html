@@ -1,0 +1,341 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Warden Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#7c839b",
+                        "tertiary-container": "#001a42",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-tertiary-fixed": "#001a42",
+                        "surface-container-low": "#f2f4f6",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary": "#006a61",
+                        "on-tertiary-fixed-variant": "#004395",
+                        "inverse-surface": "#2d3133",
+                        "tertiary": "#000000",
+                        "on-secondary-fixed": "#00201d",
+                        "secondary-container": "#86f2e4",
+                        "on-secondary": "#ffffff",
+                        "background": "#f7f9fb",
+                        "on-surface-variant": "#45464d",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#191c1e",
+                        "on-primary-fixed": "#131b2e",
+                        "on-background": "#191c1e",
+                        "on-secondary-fixed-variant": "#005049",
+                        "surface-container": "#eceef0",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#006f66",
+                        "inverse-on-surface": "#eff1f3",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "surface-dim": "#d8dadc",
+                        "surface-tint": "#565e74",
+                        "primary-fixed-dim": "#bec6e0",
+                        "secondary-fixed-dim": "#6bd8cb",
+                        "surface-bright": "#f7f9fb",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#dae2fd",
+                        "surface-container-high": "#e6e8ea",
+                        "inverse-primary": "#bec6e0",
+                        "secondary-fixed": "#89f5e7",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-tertiary-container": "#3980f4",
+                        "tertiary-fixed": "#d8e2ff",
+                        "primary-container": "#131b2e",
+                        "outline": "#76777d",
+                        "outline-variant": "#c6c6cd",
+                        "surface": "#f7f9fb",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e0e3e5",
+                        "primary": "#000000"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "32px",
+                        "gutter": "16px",
+                        "xs": "8px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "base": "4px",
+                        "margin-mobile": "16px",
+                        "sm": "12px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "status-label": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "title-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "status-label": ["13px", { "lineHeight": "16px", "fontWeight": "600" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "title-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Level 1 (Cards) Elevation */
+        .elevation-1 {
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Tonal background shift on hover */
+        .card-hover:hover {
+            background-color: #f2f4f6; /* surface-container-low */
+            transition: background-color 0.2s ease;
+        }
+        
+        /* Hide scrollbar for clean dashboard look */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #c6c6cd; /* outline-variant */
+            border-radius: 10px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-lg text-body-lg flex flex-col h-screen overflow-hidden antialiased">
+<!-- TopAppBar JSON Executed -->
+<header class="bg-background flex justify-between items-center w-full px-margin-mobile h-12 z-50 sticky top-0 md:px-margin-desktop">
+<div class="flex items-center gap-sm">
+<button class="text-primary hover:bg-surface-container rounded-full p-1 transition-colors flex items-center justify-center md:hidden">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<span class="font-headline-md text-headline-md text-primary tracking-tight">SCMS</span>
+</div>
+<div class="flex items-center gap-md">
+<!-- Active Alerts Injection based on prompt -->
+<div class="bg-error text-on-error px-3 py-1 rounded-full flex items-center gap-1 elevation-1 cursor-pointer hover:bg-[#a61717] transition-colors">
+<span class="material-symbols-outlined text-[16px]">notifications_active</span>
+<span class="font-status-label text-status-label">2 Active Alerts</span>
+</div>
+<button class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant focus:outline-none focus:ring-2 focus:ring-secondary hover:bg-surface-container transition-transform duration-150 transform hover:scale-95">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a campus security warden in uniform, brightly lit in a modern indoor environment. Corporate light mode aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9lFMTMWZo8wvaV2_804WBDcicE0Y4veet1b5ngrrcF5W2ijFTP3Pi7eMs9ptIUCcmoI3zrsv1GGngKsvb-g-adN0BjPfeEwRelpeMaO4ujgh2dCjrviIReFQARCGWq_ObfHI-N4ET0O31_3Pkk3GTtbuA9Lb0n4bEV4139iVGdSW_U_yqEhB2CElFGhw4M6Za9FdlZ18p5pC20_6fPxhdK8Or52xu1zVX2mwmPruuNXThiBk6wkjeQ6Ovo4dkQITPJo4x_9hjOStJ">
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 overflow-y-auto w-full pb-[80px] md:pb-lg pt-sm">
+<div class="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop space-y-lg">
+<!-- Dashboard Header Area -->
+<div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary-container">[Warden] Dashboard</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-base">Task-oriented overview for campus staff operations.</p>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter md:gap-lg">
+<!-- My Assigned Zone (Large Card) -->
+<div class="md:col-span-8 bg-surface border border-outline-variant rounded-xl elevation-1 overflow-hidden flex flex-col">
+<div class="p-md md:p-lg border-b border-outline-variant flex justify-between items-center bg-surface-bright">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-secondary icon-fill">location_on</span>
+<h2 class="font-title-md text-title-md text-on-surface">My Assigned Zone</h2>
+</div>
+<div class="bg-[#dcfce7] text-[#166534] px-2 py-1 rounded-full flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-[#16a34a]"></span>
+<span class="font-status-label text-status-label">Secure</span>
+</div>
+</div>
+<div class="p-md md:p-lg flex-1 flex flex-col md:flex-row gap-lg">
+<div class="flex-1 space-y-sm">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase">Current Location</p>
+<p class="font-body-lg text-body-lg font-semibold mt-1">North Campus Gate 4</p>
+</div>
+<div class="grid grid-cols-2 gap-sm pt-xs">
+<div class="bg-surface-container-low p-sm rounded-lg border border-outline-variant">
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase">Staff Present</p>
+<p class="font-title-md text-title-md mt-1">4 Personnel</p>
+</div>
+<div class="bg-surface-container-low p-sm rounded-lg border border-outline-variant">
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase">Last Sweep</p>
+<p class="font-title-md text-title-md mt-1">12 Mins Ago</p>
+</div>
+</div>
+</div>
+<!-- Mini Map Visual Representation (Abstracted for UI) -->
+<div class="flex-1 bg-surface-container-low rounded-lg border border-outline-variant relative overflow-hidden min-h-[160px] flex items-center justify-center">
+<!-- Subtle grid pattern background -->
+<div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#45464d 1px, transparent 1px); background-size: 16px 16px;"></div>
+<!-- Map Elements -->
+<div class="absolute top-1/4 left-1/4 w-3 h-3 bg-secondary rounded-sm shadow-sm"></div>
+<div class="absolute bottom-1/3 right-1/4 w-3 h-3 bg-secondary rounded-sm shadow-sm"></div>
+<div class="absolute top-1/2 left-1/2 w-4 h-4 bg-tertiary-container rounded-sm shadow-md z-10 flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2">
+<span class="material-symbols-outlined text-on-tertiary text-[12px]">person</span>
+</div>
+<div class="z-10 bg-surface/80 backdrop-blur-sm px-3 py-1 rounded border border-outline-variant absolute bottom-sm right-sm">
+<span class="font-status-label text-status-label text-on-surface-variant">Zone Beta-4</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Actions (Column) -->
+<div class="md:col-span-4 flex flex-col gap-gutter">
+<div class="bg-surface border border-outline-variant rounded-xl elevation-1 p-md flex-1 flex flex-col justify-center gap-xs">
+<h2 class="font-title-md text-title-md text-on-surface mb-xs px-1">Quick Actions</h2>
+<!-- Primary Action: Solid Deep Navy for Admin -->
+<button class="w-full bg-tertiary-container text-on-tertiary font-body-lg text-body-lg font-semibold h-[48px] rounded-[12px] flex items-center justify-center gap-sm hover:bg-[#002a66] transition-colors shadow-sm">
+<span class="material-symbols-outlined icon-fill">update</span>
+                            Update Zone Status
+                        </button>
+<button class="w-full bg-surface-container-low text-on-surface font-body-lg text-body-lg font-semibold h-[48px] rounded-[12px] flex items-center justify-center gap-sm border border-outline-variant hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined">report</span>
+                            Report Incident
+                        </button>
+<!-- Red tint for critical action -->
+<button class="w-full bg-[#fef2f2] text-[#991b1b] border border-[#fecaca] font-body-lg text-body-lg font-semibold h-[48px] rounded-[12px] flex items-center justify-center gap-sm hover:bg-[#fee2e2] transition-colors mt-base">
+<span class="material-symbols-outlined">campaign</span>
+                            Broadcast Alert
+                        </button>
+</div>
+</div>
+<!-- Recent Incidents List (Full Width) -->
+<div class="md:col-span-12 bg-surface border border-outline-variant rounded-xl elevation-1 overflow-hidden">
+<div class="p-md border-b border-outline-variant flex justify-between items-center bg-surface-bright">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-on-surface-variant">history</span>
+<h2 class="font-title-md text-title-md text-on-surface">Recent Incidents</h2>
+</div>
+<button class="text-secondary font-status-label text-status-label hover:underline">View All</button>
+</div>
+<div class="flex flex-col">
+<!-- List Item 1 -->
+<div class="p-md border-b border-outline-variant flex items-start gap-md card-hover cursor-pointer">
+<div class="bg-error-container text-on-error-container p-2 rounded-full flex-shrink-0 mt-1">
+<span class="material-symbols-outlined icon-fill">warning</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="font-title-md text-title-md text-on-surface">Unauthorized Access Attempt</h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant whitespace-nowrap">10 mins ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-1">Individual lacking proper credentials attempted entry at Service Gate 2. Situation contained.</p>
+<div class="flex items-center gap-xs mt-2">
+<span class="bg-[#fee2e2] text-[#991b1b] px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider">High Priority</span>
+<span class="font-status-label text-status-label text-on-surface-variant">• Service Gate 2</span>
+</div>
+</div>
+</div>
+<!-- List Item 2 -->
+<div class="p-md flex items-start gap-md card-hover cursor-pointer">
+<div class="bg-[#fef3c7] text-[#92400e] p-2 rounded-full flex-shrink-0 mt-1">
+<span class="material-symbols-outlined icon-fill">construction</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="font-title-md text-title-md text-on-surface">Maintenance Blocking Path</h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant whitespace-nowrap">45 mins ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-1">Routine utility maintenance blocking primary pedestrian pathway near Engineering Hall.</p>
+<div class="flex items-center gap-xs mt-2">
+<span class="bg-[#fef3c7] text-[#92400e] px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider">Low Priority</span>
+<span class="font-status-label text-status-label text-on-surface-variant">• Engineering Walkway</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar JSON Executed -->
+<nav class="bg-surface shadow-[0_-2px_4px_rgba(0,0,0,0.05)] shadow-lg rounded-t-xl fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 md:hidden">
+<!-- Active Tab: Dashboard -->
+<button class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-4 py-1 transform scale-95 transition-all w-16 group focus:outline-none">
+<span class="material-symbols-outlined icon-fill">dashboard</span>
+<span class="font-status-label text-status-label mt-1">Dashboard</span>
+</button>
+<!-- Inactive Tab: Tasks -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high rounded-xl transition-colors w-16 group focus:outline-none">
+<span class="material-symbols-outlined">assignment</span>
+<span class="font-status-label text-status-label mt-1 group-hover:text-on-surface transition-colors">Tasks</span>
+</button>
+<!-- Inactive Tab: Reports -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high rounded-xl transition-colors w-16 group focus:outline-none">
+<span class="material-symbols-outlined">assessment</span>
+<span class="font-status-label text-status-label mt-1 group-hover:text-on-surface transition-colors">Reports</span>
+</button>
+<!-- Inactive Tab: Profile -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high rounded-xl transition-colors w-16 group focus:outline-none">
+<span class="material-symbols-outlined">person</span>
+<span class="font-status-label text-status-label mt-1 group-hover:text-on-surface transition-colors">Profile</span>
+</button>
+</nav>
+<!-- Desktop SideNav Placeholder (Hidden on Mobile, Visible on md+) -->
+<!-- Implementing the structural intent for larger screens, though the main mobile focus is bottom nav -->
+<div class="hidden md:flex fixed left-0 top-12 h-[calc(100vh-48px)] w-[280px] bg-surface border-r border-outline-variant z-40 flex-col pt-lg pb-md px-md">
+<div class="px-sm mb-lg">
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Admin Portal</p>
+</div>
+<div class="flex flex-col gap-2">
+<button class="flex items-center gap-sm bg-secondary-container text-on-secondary-container px-sm py-2 rounded-full font-title-md text-title-md transition-colors text-left">
+<span class="material-symbols-outlined icon-fill">dashboard</span>
+                 Dashboard
+             </button>
+<button class="flex items-center gap-sm text-on-surface-variant hover:bg-surface-container px-sm py-2 rounded-full font-body-lg text-body-lg transition-colors text-left">
+<span class="material-symbols-outlined">assignment</span>
+                 Tasks
+             </button>
+<button class="flex items-center gap-sm text-on-surface-variant hover:bg-surface-container px-sm py-2 rounded-full font-body-lg text-body-lg transition-colors text-left">
+<span class="material-symbols-outlined">assessment</span>
+                 Reports
+             </button>
+</div>
+</div>
+<!-- Add padding to main content on desktop to accommodate sidebar -->
+<style>
+        @media (min-width: 768px) {
+            main {
+                padding-left: 280px;
+            }
+        }
+    </style>
+
+
+</body></html>

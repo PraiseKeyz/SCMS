@@ -1,0 +1,323 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>SCMS - Broadcast Alert</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed": "#d8e2ff",
+                      "surface-variant": "#e0e3e5",
+                      "on-tertiary-container": "#3980f4",
+                      "tertiary-container": "#001a42",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container-high": "#e6e8ea",
+                      "tertiary-fixed-dim": "#adc6ff",
+                      "on-primary-container": "#7c839b",
+                      "surface-container-low": "#f2f4f6",
+                      "primary-fixed-dim": "#bec6e0",
+                      "outline-variant": "#c6c6cd",
+                      "inverse-surface": "#2d3133",
+                      "on-secondary-fixed-variant": "#005049",
+                      "surface-tint": "#565e74",
+                      "secondary-fixed": "#89f5e7",
+                      "on-secondary-container": "#006f66",
+                      "on-tertiary-fixed": "#001a42",
+                      "background": "#f7f9fb",
+                      "inverse-on-surface": "#eff1f3",
+                      "on-surface-variant": "#45464d",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#004395",
+                      "surface-container": "#eceef0",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "secondary": "#006a61",
+                      "tertiary": "#000000",
+                      "surface-bright": "#f7f9fb",
+                      "secondary-fixed-dim": "#6bd8cb",
+                      "surface-container-highest": "#e0e3e5",
+                      "on-surface": "#191c1e",
+                      "on-secondary-fixed": "#00201d",
+                      "inverse-primary": "#bec6e0",
+                      "primary-fixed": "#dae2fd",
+                      "primary-container": "#131b2e",
+                      "on-primary-fixed": "#131b2e",
+                      "on-error": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "error": "#ba1a1a",
+                      "surface-dim": "#d8dadc",
+                      "outline": "#76777d",
+                      "surface": "#f7f9fb",
+                      "primary": "#000000",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "secondary-container": "#86f2e4",
+                      "on-background": "#191c1e"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lg": "24px",
+                      "xs": "8px",
+                      "md": "16px",
+                      "sm": "12px",
+                      "margin-mobile": "16px",
+                      "margin-desktop": "32px",
+                      "gutter": "16px",
+                      "xl": "32px",
+                      "base": "4px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Inter"],
+                      "status-label": ["Inter"],
+                      "title-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "label-caps": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                      "status-label": ["13px", {"lineHeight": "16px", "fontWeight": "600"}],
+                      "title-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill-1 {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Modal Animation */
+        #confirmation-modal.active {
+            display: flex;
+            animation: fadeIn 0.2s ease-out;
+        }
+        #confirmation-modal.active .modal-content {
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen font-body-lg antialiased flex flex-col md:flex-row">
+<!-- Navigation Drawer (Desktop) -->
+<aside class="hidden md:flex flex-col gap-base p-md bg-surface-container-low h-full w-[280px] fixed left-0 top-0 shadow-xl border-r border-outline-variant z-40">
+<div class="flex items-center gap-sm mb-lg px-md pt-sm">
+<img class="w-10 h-10 rounded-full object-cover shadow-sm" data-alt="A small, professional portrait photo of a security staff member in uniform, looking confident and approachable. Soft, even lighting, solid neutral background. Modern corporate security aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3mfgfmp15y6nAc8Ek1Ce-NzNLy8vUN_5T7rbYMLaVTSqhjQhjRo1W_txdQWL-YTXpVbRP5YIsiEt9WtQ5F7KSHEr0RFBtC_h46I6MN0R1rqj2iHLzKgXUtFt6ew70xn-hzF9Zsky4U6jUN0rkw8ePREUF_fbYhIVhT62ZhUtMWyc0-rIRURYo_rYO1jp0LvtS7CkxuplUNlxVvhwjgikIH-5TyKo6can9lkLrexDIeo0Rz4GIC5Dg0Aix6Vo7jHxQWOR66cnj1RcM">
+<div>
+<h2 class="font-title-md text-title-md text-primary">Staff Member</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Warden Office • Shift: Morning</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-high rounded-r-full transition-all duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-body-lg text-body-lg">Home</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-high rounded-r-full transition-all duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined">security</span>
+<span class="font-body-lg text-body-lg">Security Logs</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-high rounded-r-full transition-all duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined">gate</span>
+<span class="font-body-lg text-body-lg">Gate Management</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm bg-secondary-container text-on-secondary-container font-bold rounded-r-full transition-all duration-300 ease-in-out shadow-sm" href="#">
+<span class="material-symbols-outlined fill-1">campaign</span>
+<span class="font-body-lg text-body-lg">Broadcast Alert</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-high rounded-r-full transition-all duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-lg text-body-lg">Reports</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-high rounded-r-full transition-all duration-300 ease-in-out mt-auto" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-lg text-body-lg">Settings</span>
+</a>
+</nav>
+</aside>
+<!-- Top App Bar (Mobile & Contextual Header) -->
+<header class="w-full top-0 sticky bg-surface flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 shadow-sm border-b border-outline-variant z-30 md:pl-[312px]">
+<div class="flex items-center gap-sm">
+<button class="md:hidden text-on-surface-variant hover:bg-surface-container rounded-full p-2 transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">[Warden] Broadcast Alert</h1>
+</div>
+<!-- Right side actions if needed, empty for focus -->
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full md:pl-[280px] pt-4 pb-24 md:pb-8 px-margin-mobile md:px-margin-desktop max-w-5xl mx-auto flex flex-col gap-lg">
+<!-- Header Section -->
+<div class="flex flex-col gap-xs">
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                Create and deploy a campus-wide or targeted alert. This message will override standard notifications for affected users.
+            </p>
+</div>
+<!-- Compose Form - Bento Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+<!-- Primary Message Area (Spans 2 columns on large screens) -->
+<div class="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-sm flex flex-col gap-md">
+<div class="flex items-center justify-between">
+<h3 class="font-title-md text-title-md text-on-surface flex items-center gap-sm">
+<span class="material-symbols-outlined text-outline">edit_note</span>
+                        Message Details
+                    </h3>
+<span class="font-label-caps text-label-caps text-error bg-error-container px-2 py-1 rounded">HIGH PRIORITY</span>
+</div>
+<div class="flex flex-col gap-xs">
+<label class="font-status-label text-status-label text-on-surface-variant" for="alert-title">Alert Title</label>
+<input class="w-full bg-surface border border-outline-variant rounded-lg px-md py-sm font-body-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-shadow" id="alert-title" placeholder="e.g., Severe Weather Warning" type="text">
+</div>
+<div class="flex flex-col gap-xs flex-1">
+<label class="font-status-label text-status-label text-on-surface-variant flex justify-between" for="alert-message">
+                        Message Body
+                        <span class="text-outline font-body-sm">0/250</span>
+</label>
+<textarea class="w-full bg-surface border border-outline-variant rounded-lg px-md py-sm font-body-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-shadow resize-none flex-1" id="alert-message" placeholder="Enter the exact message to be broadcasted..." rows="5"></textarea>
+</div>
+</div>
+<!-- Parameters Side Column -->
+<div class="flex flex-col gap-lg">
+<!-- Target Area -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-sm flex flex-col gap-md">
+<h3 class="font-title-md text-title-md text-on-surface flex items-center gap-sm">
+<span class="material-symbols-outlined text-outline">radar</span>
+                        Target Area
+                    </h3>
+<div class="relative h-32 rounded-lg overflow-hidden border border-outline-variant mb-2">
+<div class="absolute inset-0 bg-surface-container-highest flex items-center justify-center text-outline">
+<img class="w-full h-full object-cover opacity-80 mix-blend-multiply" data-alt="A stylized, top-down map of a modern university campus or corporate park. Features minimalist vector geometry with subtle roads, green spaces, and building footprints. A faint circular radar ping or highlighted zone sits in the center. Professional UI map aesthetic, light mode." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAH2zoaGuZhzn66X103dBIaP3KIsSOPDqQKD7vihF1yc8u0frZTHycnhOaXYbmwnKmMAtHDhO8V2zzbNyegtrPzLEeU9q7skHe-hnrMEBjiLLgeCgpnnZakXeZMhs2LsDlt7E9cGTBE1qjnhzOPRNTX-Ju_tY2cqvsK8w3He2rT49DmavJajNLKAPwwep-Cw7dCWHQBWEt8M8ocxKCit0w3Rpebj6TeXoLc3Ew6eDAs44L70MK0QKTWTEtU0yF9yEoKRon2eiZ6qTuU">
+</div>
+</div>
+<div class="flex flex-col gap-xs">
+<label class="font-status-label text-status-label text-on-surface-variant">Radius</label>
+<select class="w-full bg-surface border border-outline-variant rounded-lg px-md py-sm font-body-lg text-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary">
+<option>Entire Campus (Global)</option>
+<option>North Wing + 500m</option>
+<option>Main Gate + 1km</option>
+<option>Custom Polygon...</option>
+</select>
+</div>
+</div>
+<!-- Expiry Settings -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-sm flex flex-col gap-md">
+<h3 class="font-title-md text-title-md text-on-surface flex items-center gap-sm">
+<span class="material-symbols-outlined text-outline">timer</span>
+                        Duration
+                    </h3>
+<div class="grid grid-cols-3 gap-sm">
+<button class="bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-status-label text-status-label py-sm rounded-lg border border-transparent focus:border-secondary focus:ring-1 focus:ring-secondary transition-colors">30m</button>
+<button class="bg-secondary-container text-on-secondary-container font-status-label text-status-label py-sm rounded-lg border border-secondary transition-colors shadow-sm">1h</button>
+<button class="bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-status-label text-status-label py-sm rounded-lg border border-transparent focus:border-secondary focus:ring-1 focus:ring-secondary transition-colors">4h</button>
+</div>
+<div class="flex flex-col gap-xs mt-2">
+<label class="flex items-center gap-sm cursor-pointer">
+<input class="w-5 h-5 text-secondary border-outline-variant rounded focus:ring-secondary" type="checkbox">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Require manual dismissal by users</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Bar -->
+<div class="mt-4 flex justify-end gap-md">
+<button class="px-xl py-3 rounded-xl border border-outline-variant text-on-surface-variant font-title-md text-title-md hover:bg-surface-container transition-colors">
+                Cancel
+            </button>
+<button class="px-xl py-3 rounded-xl bg-error text-on-error font-title-md text-title-md shadow-md hover:shadow-lg hover:bg-[#a41515] active:scale-95 transition-all flex items-center gap-sm" id="trigger-broadcast-btn">
+<span class="material-symbols-outlined">cell_tower</span>
+                Send Broadcast
+            </button>
+</div>
+</main>
+<!-- Confirmation Modal Overlay -->
+<div class="fixed inset-0 z-50 hidden items-center justify-center px-4 bg-primary/40 backdrop-blur-sm" id="confirmation-modal">
+<div class="modal-content bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant max-w-md w-full p-lg flex flex-col gap-lg">
+<div class="flex items-start gap-md">
+<div class="bg-error-container text-on-error-container p-3 rounded-full flex-shrink-0">
+<span class="material-symbols-outlined text-headline-lg font-bold">warning</span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-primary mb-1">Confirm Broadcast</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                        You are about to send a high-priority alert to all selected zones. This will trigger push notifications and audible alarms on recipient devices.
+                    </p>
+</div>
+</div>
+<div class="bg-surface-container p-md rounded-xl border border-outline-variant">
+<p class="font-status-label text-status-label text-on-surface-variant mb-1">PREVIEW</p>
+<p class="font-body-lg text-body-lg text-on-surface font-bold">Severe Weather Warning</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant italic mt-1">"Please seek shelter immediately..."</p>
+</div>
+<div class="flex justify-end gap-sm mt-2">
+<button class="px-lg py-2 rounded-lg text-on-surface-variant hover:bg-surface-container font-title-md text-title-md transition-colors" id="cancel-modal-btn">
+                    Review Again
+                </button>
+<button class="px-lg py-2 rounded-lg bg-error text-on-error font-title-md text-title-md shadow-sm hover:shadow-md active:scale-95 transition-all">
+                    Confirm &amp; Send
+                </button>
+</div>
+</div>
+</div>
+<!-- Script for Modal Interaction -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const triggerBtn = document.getElementById('trigger-broadcast-btn');
+            const modal = document.getElementById('confirmation-modal');
+            const cancelBtn = document.getElementById('cancel-modal-btn');
+
+            triggerBtn.addEventListener('click', () => {
+                modal.classList.add('active');
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                modal.classList.remove('active');
+            });
+
+            // Close on click outside
+            modal.addEventListener('click', (e) => {
+                if(e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+    </script>
+
+
+</body></html>
