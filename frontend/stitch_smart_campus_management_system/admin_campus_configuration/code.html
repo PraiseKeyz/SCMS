@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Campus Configuration</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#3f465c",
+                        "background": "#f7f9fb",
+                        "secondary-fixed-dim": "#6bd8cb",
+                        "primary-fixed": "#dae2fd",
+                        "primary-container": "#131b2e",
+                        "on-secondary-fixed-variant": "#005049",
+                        "on-primary-container": "#7c839b",
+                        "surface-container-high": "#e6e8ea",
+                        "on-tertiary-fixed": "#001a42",
+                        "on-tertiary-fixed-variant": "#004395",
+                        "on-surface": "#191c1e",
+                        "on-error": "#ffffff",
+                        "outline-variant": "#c6c6cd",
+                        "surface-container-lowest": "#ffffff",
+                        "primary": "#000000",
+                        "on-surface-variant": "#45464d",
+                        "surface-container-low": "#f2f4f6",
+                        "on-background": "#191c1e",
+                        "tertiary-fixed": "#d8e2ff",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#2d3133",
+                        "tertiary-container": "#001a42",
+                        "surface": "#f7f9fb",
+                        "outline": "#76777d",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#89f5e7",
+                        "surface-dim": "#d8dadc",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-tertiary-container": "#3980f4",
+                        "tertiary": "#000000",
+                        "inverse-primary": "#bec6e0",
+                        "secondary-container": "#86f2e4",
+                        "on-secondary-container": "#006f66",
+                        "on-primary-fixed": "#131b2e",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-secondary": "#ffffff",
+                        "surface-tint": "#565e74",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "on-secondary-fixed": "#00201d",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e0e3e5",
+                        "surface-container": "#eceef0",
+                        "secondary": "#006a61",
+                        "surface-variant": "#e0e3e5",
+                        "surface-bright": "#f7f9fb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "12px",
+                        "gutter": "16px",
+                        "margin-mobile": "16px",
+                        "xs": "8px",
+                        "margin-desktop": "32px",
+                        "base": "4px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "title-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "status-label": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-caps": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "title-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "status-label": ["13px", { "lineHeight": "16px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .fab-shadow { box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1); }
+        .card-shadow { box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-lg">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky border-b border-outline-variant dark:border-outline shadow-sm bg-surface dark:bg-inverse-surface flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 w-full z-40">
+<div class="flex items-center gap-md">
+<button class="p-xs rounded-full hover:bg-surface-container transition-colors duration-200">
+<span class="material-symbols-outlined text-primary dark:text-inverse-primary" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-inverse-primary">SCMS</h1>
+</div>
+<div>
+<div class="w-10 h-10 rounded-full bg-surface-variant overflow-hidden">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A small, circular avatar portrait of an administrative user. High quality, professional lighting, centered face. The background should be a subtle corporate gradient to fit the admin theme." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgYu9hd1c8r67gIoPs4PaaR_UcnPJkZmcegE8t4mSowx8W1VM_QY_LrPfztvGe27yx4cHUzQscExbX1996kVP4AgKBUyl8NG3qnRDQ7jDhMieqY8_SIjYpaeukgNAX46i6QrWN7-FzNgfZg6cC6MsH5ry1IcumEfRz-dpafDUOoalKwoDB_6lr2_dalij5o3FVLJFqDQVeGvEuAB2sw2aNsfqaK8pHxJ8sxrKr9uT-CQ7sLLfMp6pZcsa3C51SzXvzST8CMoPMuBfk"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-7xl mx-auto flex flex-col md:flex-row relative">
+<!-- Desktop Nav Drawer (Hidden on Mobile) -->
+<aside class="hidden md:flex bg-surface-container-low dark:bg-inverse-surface text-primary dark:text-inverse-primary font-body-lg text-body-lg h-[calc(100vh-64px)] w-[280px] sticky top-16 shadow-xl flex-col gap-base p-md z-30 border-r border-surface-container dark:border-surface-container-highest">
+<div class="flex items-center gap-sm mb-lg px-xs">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-variant">
+<img alt="Staff Member Avatar" class="w-full h-full object-cover" data-alt="Another professional avatar portrait, slightly larger, representing a staff member. Clean background, corporate lighting, high quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPRUaZ9daGsVYduYA3ivhRGGaHaVsZ0dbouviNRr217alIHM8GPz8BqPwwiOo7sznrkmzsC8EsOzfScBRCPtSXY57RCwNy4BgUyzvRXyABx7B-m7YLmTSOvCyMmvu4Wmk01vD-VBqMzkSznMrw4qbwnng713321XXBp-RMZO7tb4lSdsCfwYGtlBoZrtC7S9xJp8w6x3bIzejokpY660NP_TiGm2u32Q3KEz2eTU6oi8xhABuH-TNBMbR8V70sSlCW3rV733H_8Kcp"/>
+</div>
+<div>
+<div class="font-title-md text-title-md">Staff Member</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Warden Office</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant opacity-75 mt-1">Shift: Morning</div>
+</div>
+</div>
+<nav class="flex flex-col gap-xs">
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-r-full transition-all duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span>Home</span>
+</a>
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-r-full transition-all duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span>Security Logs</span>
+</a>
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-r-full transition-all duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="gate">gate</span>
+<span>Gate Management</span>
+</a>
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-r-full transition-all duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>Reports</span>
+</a>
+<a class="flex items-center gap-sm px-4 py-3 bg-secondary-container text-on-secondary-container font-bold rounded-r-full transition-all duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+</aside>
+<!-- Content Area -->
+<section class="flex-1 px-margin-mobile md:px-margin-desktop py-lg pb-32 md:pb-lg flex flex-col gap-lg">
+<header>
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary mb-2">Campus Configuration</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Manage physical campus assets, access points, and spatial zones.</p>
+</header>
+<!-- Tabs -->
+<div class="flex border-b border-outline-variant gap-lg overflow-x-auto hide-scrollbar">
+<button class="font-title-md text-title-md pb-2 border-b-2 border-primary text-primary whitespace-nowrap px-xs">Zones</button>
+<button class="font-title-md text-title-md pb-2 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap px-xs">Gates</button>
+<button class="font-title-md text-title-md pb-2 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap px-xs">Landmarks</button>
+</div>
+<!-- List View (Zones Active) -->
+<div class="flex flex-col gap-md">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest border border-surface-container-highest rounded-lg p-md card-shadow flex justify-between items-start hover:bg-surface-container-low transition-colors group cursor-pointer">
+<div class="flex gap-md items-start w-full">
+<div class="w-12 h-12 rounded bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-title-md text-title-md text-primary">Academic Quad</h3>
+<span class="bg-secondary-container text-on-secondary-container font-status-label text-status-label px-2 py-1 rounded-full flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-secondary inline-block"></span> Active</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-2">Primary instruction area. High traffic during day hours.</p>
+<div class="flex gap-sm text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="groups">groups</span> Cap: 5,000</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="lock_open">lock_open</span> Open</span>
+</div>
+</div>
+</div>
+<button class="p-xs text-on-surface-variant hover:text-primary transition-colors md:opacity-0 group-hover:opacity-100 shrink-0">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest border border-surface-container-highest rounded-lg p-md card-shadow flex justify-between items-start hover:bg-surface-container-low transition-colors group cursor-pointer">
+<div class="flex gap-md items-start w-full">
+<div class="w-12 h-12 rounded bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="science">science</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-title-md text-title-md text-primary">Research Park North</h3>
+<span class="bg-surface-variant text-on-surface-variant font-status-label text-status-label px-2 py-1 rounded-full flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-outline inline-block"></span> Restricted</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-2">Secure lab facilities. Level 3 access required.</p>
+<div class="flex gap-sm text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="groups">groups</span> Cap: 800</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="lock">lock</span> Secured</span>
+</div>
+</div>
+</div>
+<button class="p-xs text-on-surface-variant hover:text-primary transition-colors md:opacity-0 group-hover:opacity-100 shrink-0">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest border border-surface-container-highest rounded-lg p-md card-shadow flex justify-between items-start hover:bg-surface-container-low transition-colors group cursor-pointer">
+<div class="flex gap-md items-start w-full">
+<div class="w-12 h-12 rounded bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="local_parking">local_parking</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-title-md text-title-md text-primary">Visitor Lot B</h3>
+<span class="bg-error-container text-on-error-container font-status-label text-status-label px-2 py-1 rounded-full flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-error inline-block"></span> Maintenance</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-2">South entrance public parking. Currently under resurfacing.</p>
+<div class="flex gap-sm text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="directions_car">directions_car</span> Cap: 350</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="block">block</span> Closed</span>
+</div>
+</div>
+</div>
+<button class="p-xs text-on-surface-variant hover:text-primary transition-colors md:opacity-0 group-hover:opacity-100 shrink-0">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+</div>
+</div>
+<!-- FAB -->
+<button class="fixed bottom-24 right-4 md:bottom-8 md:right-8 w-14 h-14 bg-primary-container text-on-primary-container rounded-xl flex items-center justify-center fab-shadow hover:bg-primary-fixed transition-colors z-40">
+<span class="material-symbols-outlined" data-icon="add" data-weight="fill" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 pb-safe bg-surface dark:bg-inverse-surface shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] rounded-t-xl md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant p-2 hover:bg-surface-container-high dark:hover:bg-on-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-status-label text-status-label mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant p-2 hover:bg-surface-container-high dark:hover:bg-on-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="font-status-label text-status-label mt-1">Map</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant p-2 hover:bg-surface-container-high dark:hover:bg-on-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span class="font-status-label text-status-label mt-1">Tasks</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-on-secondary-fixed-variant text-on-secondary-container dark:text-secondary-fixed rounded-full px-4 py-1 hover:bg-surface-container-high dark:hover:bg-on-surface-variant transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-status-label text-status-label mt-1">Profile</span>
+</a>
+</nav>
+<style>
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .pb-safe {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+    </style>
+</body></html>

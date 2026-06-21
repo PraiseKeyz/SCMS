@@ -1,0 +1,436 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Campus Parking Zones</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed": "#d8e2ff",
+                      "surface-variant": "#e0e3e5",
+                      "on-tertiary-container": "#3980f4",
+                      "tertiary-container": "#001a42",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container-high": "#e6e8ea",
+                      "tertiary-fixed-dim": "#adc6ff",
+                      "on-primary-container": "#7c839b",
+                      "surface-container-low": "#f2f4f6",
+                      "primary-fixed-dim": "#bec6e0",
+                      "outline-variant": "#c6c6cd",
+                      "inverse-surface": "#2d3133",
+                      "on-secondary-fixed-variant": "#005049",
+                      "surface-tint": "#565e74",
+                      "secondary-fixed": "#89f5e7",
+                      "on-secondary-container": "#006f66",
+                      "on-tertiary-fixed": "#001a42",
+                      "background": "#f7f9fb",
+                      "inverse-on-surface": "#eff1f3",
+                      "on-surface-variant": "#45464d",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#004395",
+                      "surface-container": "#eceef0",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "secondary": "#006a61",
+                      "tertiary": "#000000",
+                      "surface-bright": "#f7f9fb",
+                      "secondary-fixed-dim": "#6bd8cb",
+                      "surface-container-highest": "#e0e3e5",
+                      "on-surface": "#191c1e",
+                      "on-secondary-fixed": "#00201d",
+                      "inverse-primary": "#bec6e0",
+                      "primary-fixed": "#dae2fd",
+                      "primary-container": "#131b2e",
+                      "on-primary-fixed": "#131b2e",
+                      "on-error": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "error": "#ba1a1a",
+                      "surface-dim": "#d8dadc",
+                      "outline": "#76777d",
+                      "surface": "#f7f9fb",
+                      "primary": "#000000",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "secondary-container": "#86f2e4",
+                      "on-background": "#191c1e"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lg": "24px",
+                      "xs": "8px",
+                      "md": "16px",
+                      "sm": "12px",
+                      "margin-mobile": "16px",
+                      "margin-desktop": "32px",
+                      "gutter": "16px",
+                      "xl": "32px",
+                      "base": "4px"
+              },
+              "fontFamily": {
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "status-label": [
+                              "Inter"
+                      ],
+                      "title-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "label-caps": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "status-label": [
+                              "13px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "title-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: theme('colors.surface');
+            color: theme('colors.on-surface');
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-[88px] md:pb-0 flex flex-col md:flex-row">
+<!-- TopAppBar (Mobile & Desktop) -->
+<header class="w-full top-0 sticky bg-surface border-b border-outline-variant shadow-sm z-40 transition-colors duration-200 hidden md:flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 w-full">
+<div class="flex items-center gap-xs">
+<button class="p-xs hover:bg-surface-container rounded-full text-on-surface-variant transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<span class="font-headline-md text-headline-md font-bold text-primary">SCMS</span>
+</div>
+<!-- Desktop Navigation Embedded in TopAppBar -->
+<nav class="hidden md:flex gap-lg items-center">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-status-label text-status-label mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container px-4 py-1 rounded-full hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="font-status-label text-status-label mt-1">Map</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span class="font-status-label text-status-label mt-1">Tasks</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-status-label text-status-label mt-1">Profile</span>
+</a>
+</nav>
+<div class="flex items-center">
+<img alt="User profile photo" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-alt="A clean, professional headshot of a campus visitor or staff member in a bright, modern corporate environment. Light mode aesthetic, sharp focus, neutral background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVB6m_XOduj0IPU-7mWMUeuu5U7dGdi07YybNikiCheaJJVV_mvoglnGE4TYXwo4pQSEHgE1OiOfGSu8_p_vgCM_hmo1_T-qd6hnETIzCVGI7qqZF36rHCpE__Z3EEdcsUD8gXMn0meH7K4PSXF74xbpOf3q_k4rD4oJcvba-aW-7dHbKwFH8x9rMDL92GpDFTO3oF5LwRZCMw4vGdCv6XGHMwj-DEKqLEDQ3Cuz2AUxVzgTWp9x-IJDiPVKx24hmAA29m09blL3z1">
+</div>
+</header>
+<!-- NavigationDrawer (Desktop Side Nav) - Replaced BottomNav for Desktop -->
+<aside class="hidden md:flex flex-col gap-base p-md bg-surface-container-low w-[280px] fixed left-0 top-16 h-[calc(100vh-64px)] border-r border-outline-variant z-30 shadow-xl overflow-y-auto">
+<!-- This side nav is suppressed as per instructions since we are focusing on visitor map view, but included to demonstrate structural capability if needed, though TopAppBar handles main links. We will hide it to focus on canvas as requested for specific tasks, but keep the shell responsive structure. -->
+<div class="px-md py-lg border-b border-outline-variant mb-md hidden">
+<div class="flex items-center gap-md">
+<img alt="Staff Member Avatar" class="w-12 h-12 rounded-full object-cover" data-alt="A clean, professional headshot of a staff member. Light mode aesthetic, sharp focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC25diOxOjYt68I_GsSoKy1EwkRshpR-qvm0emGkzyBowK5q5peZRsAqCa0gH0waLAWWn6a_nQn-8X_xRSHqToyLhDuPuhj7zHBBn-LgvXZBhrW_j1Hcb2vq7jEwqDsiiNxWgIYkFoZLUjgmwrk2c7THvtr4_4GhfVcG2DylX3GMdveuwp30xxsVkb9cn09FLM_LKe3Xxx0FTnOGNvUja9q_nyQTRuMXG1Y2bc3xllsoBIdfcZ9_F42-F-uloNOv3uzxXskn8Cz4QkB">
+<div>
+<h3 class="font-title-md text-title-md text-primary">Staff Member</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Warden Office</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="flex-1 w-full md:pl-[0px] transition-all duration-300">
+<!-- Mobile Header (Visible only on mobile if top app bar is hidden) -->
+<div class="md:hidden sticky top-0 bg-surface/90 backdrop-blur-md z-30 px-margin-mobile py-sm border-b border-outline-variant shadow-sm flex items-center justify-between">
+<button class="p-xs text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary text-center flex-1">[Visitor] Parking Zones</h1>
+<div class="w-10"></div> <!-- Spacer for balance -->
+</div>
+<div class="max-w-5xl mx-auto px-margin-mobile md:px-margin-desktop py-lg space-y-lg">
+<!-- Controls Area -->
+<section class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-md">
+<div class="hidden md:block">
+<h1 class="font-headline-lg text-headline-lg text-primary">[Visitor] Parking Zones</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-1">Real-time availability across campus</p>
+</div>
+<div class="flex bg-surface-container rounded-lg p-1 w-full sm:w-auto self-stretch sm:self-auto border border-outline-variant">
+<button class="flex-1 sm:flex-none px-4 py-2 rounded-md bg-surface shadow-sm text-primary font-status-label text-status-label flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="sort">sort</span>
+                        Nearest
+                    </button>
+<button class="flex-1 sm:flex-none px-4 py-2 rounded-md text-on-surface-variant hover:text-primary font-status-label text-status-label flex items-center justify-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="check_circle">check_circle</span>
+                        Most Available
+                    </button>
+</div>
+</section>
+<!-- Grid Layout -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+<!-- Zone Card: North Lot (Green - Highly Available) -->
+<article class="bg-surface rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(0,0,0,0.05)] hover:bg-surface-container-low transition-colors duration-200 overflow-hidden flex flex-col group cursor-pointer relative">
+<div class="p-md border-b border-outline-variant/50 flex justify-between items-start">
+<div>
+<h2 class="font-title-md text-title-md text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="local_parking">local_parking</span>
+                                North Visitor Lot
+                            </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Main Entrance</p>
+</div>
+<div class="bg-[#e6f4ea] text-[#1e8e3e] px-2 py-1 rounded-full flex items-center gap-1 font-status-label text-status-label">
+<span class="w-2 h-2 rounded-full bg-[#1e8e3e]"></span>
+                            25% Full
+                        </div>
+</div>
+<div class="p-md flex-1 flex flex-col justify-center">
+<div class="flex items-end justify-between mb-4">
+<div>
+<div class="font-display-lg text-display-lg text-primary">145</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Spots Available</div>
+</div>
+<div class="text-right">
+<div class="font-title-md text-title-md text-primary flex items-center gap-1 justify-end">
+<span class="material-symbols-outlined text-[18px]" data-icon="directions_walk">directions_walk</span>
+                                     5 min
+                                 </div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">to Campus Center</div>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-surface-container-highest rounded-full h-2 mb-1">
+<div class="bg-[#1e8e3e] h-2 rounded-full" style="width: 25%"></div>
+</div>
+</div>
+<div class="px-md py-sm bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center mt-auto">
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="near_me">near_me</span>
+                            0.2 miles away
+                        </span>
+<button class="text-secondary font-status-label text-status-label hover:text-on-secondary-container transition-colors flex items-center gap-1 group-hover:underline">
+                            Navigate <span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- Zone Card: East Deck (Amber - Moderate) -->
+<article class="bg-surface rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(0,0,0,0.05)] hover:bg-surface-container-low transition-colors duration-200 overflow-hidden flex flex-col group cursor-pointer">
+<div class="p-md border-b border-outline-variant/50 flex justify-between items-start">
+<div>
+<h2 class="font-title-md text-title-md text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="local_parking">local_parking</span>
+                                East Parking Deck
+                            </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Science Block</p>
+</div>
+<div class="bg-[#fef7e0] text-[#b06000] px-2 py-1 rounded-full flex items-center gap-1 font-status-label text-status-label">
+<span class="w-2 h-2 rounded-full bg-[#f29900]"></span>
+                            78% Full
+                        </div>
+</div>
+<div class="p-md flex-1 flex flex-col justify-center">
+<div class="flex items-end justify-between mb-4">
+<div>
+<div class="font-display-lg text-display-lg text-primary">42</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Spots Available</div>
+</div>
+<div class="text-right">
+<div class="font-title-md text-title-md text-primary flex items-center gap-1 justify-end">
+<span class="material-symbols-outlined text-[18px]" data-icon="directions_walk">directions_walk</span>
+                                     12 min
+                                 </div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">to Campus Center</div>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-surface-container-highest rounded-full h-2 mb-1">
+<div class="bg-[#f29900] h-2 rounded-full" style="width: 78%"></div>
+</div>
+</div>
+<div class="px-md py-sm bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center mt-auto">
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="near_me">near_me</span>
+                            0.5 miles away
+                        </span>
+<button class="text-secondary font-status-label text-status-label hover:text-on-secondary-container transition-colors flex items-center gap-1 group-hover:underline">
+                            Navigate <span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- Zone Card: South Lot (Red - Full) -->
+<article class="bg-surface rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(0,0,0,0.05)] hover:bg-surface-container-low transition-colors duration-200 overflow-hidden flex flex-col group cursor-pointer opacity-75">
+<div class="p-md border-b border-outline-variant/50 flex justify-between items-start">
+<div>
+<h2 class="font-title-md text-title-md text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="local_parking">local_parking</span>
+                                South Library Lot
+                            </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Arts Quarter</p>
+</div>
+<div class="bg-error-container text-on-error-container px-2 py-1 rounded-full flex items-center gap-1 font-status-label text-status-label">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+                            98% Full
+                        </div>
+</div>
+<div class="p-md flex-1 flex flex-col justify-center">
+<div class="flex items-end justify-between mb-4">
+<div>
+<div class="font-display-lg text-display-lg text-primary">2</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Spots Available</div>
+</div>
+<div class="text-right">
+<div class="font-title-md text-title-md text-primary flex items-center gap-1 justify-end">
+<span class="material-symbols-outlined text-[18px]" data-icon="directions_walk">directions_walk</span>
+                                     2 min
+                                 </div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">to Campus Center</div>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-surface-container-highest rounded-full h-2 mb-1">
+<div class="bg-error h-2 rounded-full" style="width: 98%"></div>
+</div>
+</div>
+<div class="px-md py-sm bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center mt-auto">
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="near_me">near_me</span>
+                            0.8 miles away
+                        </span>
+<button class="text-on-surface-variant font-status-label text-status-label cursor-not-allowed flex items-center gap-1" disabled="">
+                            Lot Full
+                        </button>
+</div>
+</article>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl bg-surface shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] md:hidden flex justify-around items-center px-4 py-2 pb-safe transition-transform">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-status-label text-status-label mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 hover:bg-surface-container-high transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="font-status-label text-status-label mt-1">Map</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span class="font-status-label text-status-label mt-1">Tasks</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-status-label text-status-label mt-1">Profile</span>
+</a>
+</nav>
+
+
+</body></html>

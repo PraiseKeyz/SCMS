@@ -1,0 +1,329 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>SCMS - Warden Deployment</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#7c839b",
+                        "tertiary-container": "#001a42",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-tertiary-fixed": "#001a42",
+                        "surface-container-low": "#f2f4f6",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary": "#006a61",
+                        "on-tertiary-fixed-variant": "#004395",
+                        "inverse-surface": "#2d3133",
+                        "tertiary": "#000000",
+                        "on-secondary-fixed": "#00201d",
+                        "secondary-container": "#86f2e4",
+                        "on-secondary": "#ffffff",
+                        "background": "#f7f9fb",
+                        "on-surface-variant": "#45464d",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#191c1e",
+                        "on-primary-fixed": "#131b2e",
+                        "on-background": "#191c1e",
+                        "on-secondary-fixed-variant": "#005049",
+                        "surface-container": "#eceef0",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#006f66",
+                        "inverse-on-surface": "#eff1f3",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "surface-dim": "#d8dadc",
+                        "surface-tint": "#565e74",
+                        "primary-fixed-dim": "#bec6e0",
+                        "secondary-fixed-dim": "#6bd8cb",
+                        "surface-bright": "#f7f9fb",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#dae2fd",
+                        "surface-container-high": "#e6e8ea",
+                        "inverse-primary": "#bec6e0",
+                        "secondary-fixed": "#89f5e7",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-tertiary-container": "#3980f4",
+                        "tertiary-fixed": "#d8e2ff",
+                        "primary-container": "#131b2e",
+                        "outline": "#76777d",
+                        "outline-variant": "#c6c6cd",
+                        "surface": "#f7f9fb",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e0e3e5",
+                        "primary": "#000000"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "32px",
+                        "gutter": "16px",
+                        "xs": "8px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "base": "4px",
+                        "margin-mobile": "16px",
+                        "sm": "12px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "status-label": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "title-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "status-label": ["13px", { "lineHeight": "16px", "fontWeight": "600" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "title-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-lg overflow-hidden h-screen flex flex-col md:flex-row">
+<!-- Mobile Top App Bar -->
+<header class="md:hidden flex justify-between items-center w-full px-margin-mobile h-12 z-50 bg-background dark:bg-primary-container flat no shadows sticky top-0">
+<button class="text-primary dark:text-on-primary-fixed">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<span class="font-headline-md text-headline-md text-primary dark:text-on-primary-fixed">[Admin] SCMS</span>
+<img class="w-8 h-8 rounded-full object-cover" data-alt="A small circular avatar of an administrator with a professional headshot, shot in studio lighting against a clean, light corporate background. Deep blacks and whites with subtle teal accents. High-contrast corporate modern style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYhSZ7EsHX7zyWGXNhrsFYhu9PHPSqvQFeIE1g9neXVUaaTvlYVM4-p9fVAXlcxENcvvfShbJR0AX7TtSdJ4RT1c38AvulnIIoD0S1Tvh5EiEP67qN5bUT8avRK1zDZKbn28iECxy_oApM8Tofp6NnWQ2thTq3RAV_MNofpJ8dYQxbiAoHhzE8OJMHZGSCI78ZZGazlm5F-MjU-Ayk1U_YBbL8IBX20EpXVmxGnAmsweopTEDrfPn166geDXlvk2F5tJ6893NKJJ8B">
+</header>
+<!-- Desktop Navigation Drawer -->
+<nav class="hidden md:flex flex-col h-full w-[280px] rounded-r-xl bg-surface shadow-xl z-[60] py-xl flex-shrink-0">
+<div class="px-lg pb-lg border-b border-surface-variant flex items-center gap-xs">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="A small circular avatar of an administrator with a professional headshot, shot in studio lighting against a clean, light corporate background. Deep blacks and whites with subtle teal accents. High-contrast corporate modern style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtjBgfD-7fPO2wQmMQ660VnjRlq7DmKSAKTqljGT0hUqfwHk93ms3JdM2Wwqkn7Ml772cwqEu3zkb-FF66OLruiM6ol7Ys7orr-zGsfzJuMaKe0r4dEdxl4nfJI6jWZte3ELdE_ELT4lIaTl2yQxRCiNbXrSRwcCpy2T0b9blOBWWnOd3OHpe_9L10UQvD-hy-1usJIvb_myVr5eh-SD_ZxOKzvBqFqQjx2PPWG5O5yfYuBi5aK4DchvIIMPKqtETqA3z6dUNYG3TQ">
+<div>
+<h2 class="font-title-md text-title-md text-primary">Admin Portal</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Central Hub • v2.1.0</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto py-lg px-xs flex flex-col gap-base">
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container rounded-full transition-transform duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="font-body-lg text-body-lg">Visitor Map</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm bg-secondary-container text-on-secondary-container rounded-full font-bold transition-transform duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="font-body-lg text-body-lg">Security Status</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container rounded-full transition-transform duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="local_parking">local_parking</span>
+<span class="font-body-lg text-body-lg">Parking Logs</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container rounded-full transition-transform duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="report_problem">report_problem</span>
+<span class="font-body-lg text-body-lg">Incident Reports</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container rounded-full transition-transform duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-lg text-body-lg">System Settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 relative flex flex-col h-full overflow-hidden">
+<!-- Map Background Area (Simulated) -->
+<div class="absolute inset-0 bg-surface-container-low" data-alt="A clean, highly detailed top-down view of a modern corporate campus map in light mode. Features geometric buildings, crisp grey pathways, and distinct zones, with no text labels. Subtle grid overlay. Cool corporate aesthetic." data-location="Campus" style="background-image: url('https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg')">
+<!-- Simulated Map Markers -->
+<!-- Warden Marker (Staff: Deep Navy, Circle) -->
+<div class="absolute top-1/4 left-1/3 flex flex-col items-center group cursor-pointer">
+<div class="w-10 h-10 bg-tertiary-container rounded-full flex items-center justify-center shadow-md border-2 border-surface">
+<span class="material-symbols-outlined text-on-tertiary text-sm" data-icon="person">person</span>
+</div>
+</div>
+<!-- Warden Marker (Active/Selected: Glow) -->
+<div class="absolute top-1/2 left-1/2 flex flex-col items-center group cursor-pointer z-10">
+<div class="absolute inset-0 bg-tertiary-container opacity-20 rounded-full scale-150 animate-pulse"></div>
+<div class="relative w-12 h-12 bg-tertiary-container rounded-full flex items-center justify-center shadow-lg border-2 border-surface">
+<span class="material-symbols-outlined text-on-tertiary icon-fill" data-icon="security">security</span>
+</div>
+</div>
+<!-- Warden Marker -->
+<div class="absolute bottom-1/3 right-1/4 flex flex-col items-center group cursor-pointer">
+<div class="w-10 h-10 bg-tertiary-container rounded-full flex items-center justify-center shadow-md border-2 border-surface">
+<span class="material-symbols-outlined text-on-tertiary text-sm" data-icon="person">person</span>
+</div>
+</div>
+</div>
+<!-- Desktop Header Overlay -->
+<div class="hidden md:flex absolute top-0 left-0 w-full p-lg z-20 justify-between items-start pointer-events-none">
+<div class="pointer-events-auto bg-surface/90 backdrop-blur-sm p-sm rounded-xl border border-outline-variant shadow-sm flex items-center gap-sm">
+<span class="font-headline-md text-headline-md text-primary">[Admin] Warden Deployment</span>
+<div class="px-2 py-1 rounded bg-[#e8f5e9] text-[#1b5e20] flex items-center gap-1 border border-[#c8e6c9]">
+<span class="text-xs">●</span>
+<span class="font-status-label text-status-label">12 Active</span>
+</div>
+</div>
+<div class="pointer-events-auto flex gap-sm">
+<button class="bg-surface p-sm rounded-xl border border-outline-variant shadow-sm hover:bg-surface-container transition-colors text-primary flex items-center gap-xs">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+<span class="font-body-sm text-body-sm font-semibold">Filter Zones</span>
+</button>
+</div>
+</div>
+<!-- Warden List Sheet/Panel -->
+<!-- On mobile: Bottom sheet style. On desktop: Right side panel -->
+<div class="absolute bottom-0 w-full md:w-96 md:right-0 md:top-0 md:h-full bg-surface shadow-[0_-8px_16px_rgba(0,0,0,0.1)] md:shadow-[-8px_0_16px_rgba(0,0,0,0.1)] rounded-t-xl md:rounded-l-xl md:rounded-tr-none z-30 flex flex-col max-h-[530px] md:max-h-full transition-transform duration-300">
+<!-- Mobile Drag Handle -->
+<div class="md:hidden w-full flex justify-center py-xs cursor-pointer">
+<div class="w-12 h-1 bg-outline-variant rounded-full"></div>
+</div>
+<!-- Panel Header -->
+<div class="p-md border-b border-surface-variant flex justify-between items-center bg-surface sticky top-0 z-10 md:rounded-tl-xl">
+<div>
+<h3 class="font-title-md text-title-md text-primary">Active Wardens</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Real-time status overview</p>
+</div>
+<button class="text-on-surface-variant hover:bg-surface-container p-xs rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+</div>
+<!-- List Content -->
+<div class="flex-1 overflow-y-auto p-md flex flex-col gap-xs bg-surface-bright">
+<!-- Warden Card 1 (Selected/Active) -->
+<div class="bg-[#f1f5f9] border border-[#e2e8f0] rounded-lg p-sm shadow-sm cursor-pointer relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary"></div>
+<div class="flex justify-between items-start mb-xs pl-xs">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-tertiary-container text-on-tertiary flex items-center justify-center font-bold text-sm">JS</div>
+<div>
+<h4 class="font-title-md text-title-md text-primary text-base">James Smith</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-xs">North Gate • Zone A</p>
+</div>
+</div>
+<div class="px-2 py-1 rounded bg-[#e8f5e9] text-[#1b5e20] flex items-center gap-1">
+<span class="text-[10px]">●</span>
+<span class="font-status-label text-status-label text-xs">On Patrol</span>
+</div>
+</div>
+<div class="pl-xs flex items-center gap-sm font-body-sm text-body-sm text-on-surface-variant text-xs">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span> Last check: 2m ago</span>
+</div>
+</div>
+<!-- Warden Card 2 -->
+<div class="bg-surface border border-[#e2e8f0] rounded-lg p-sm hover:bg-[#f1f5f9] cursor-pointer transition-colors shadow-sm">
+<div class="flex justify-between items-start mb-xs">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-tint text-on-primary flex items-center justify-center font-bold text-sm">AD</div>
+<div>
+<h4 class="font-title-md text-title-md text-primary text-base">Alice Doe</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-xs">Main Lobby • Zone B</p>
+</div>
+</div>
+<div class="px-2 py-1 rounded bg-[#e8f5e9] text-[#1b5e20] flex items-center gap-1">
+<span class="text-[10px]">●</span>
+<span class="font-status-label text-status-label text-xs">Stationary</span>
+</div>
+</div>
+<div class="flex items-center gap-sm font-body-sm text-body-sm text-on-surface-variant text-xs">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span> Last check: 15m ago</span>
+</div>
+</div>
+<!-- Warden Card 3 -->
+<div class="bg-surface border border-[#e2e8f0] rounded-lg p-sm hover:bg-[#f1f5f9] cursor-pointer transition-colors shadow-sm">
+<div class="flex justify-between items-start mb-xs">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-tint text-on-primary flex items-center justify-center font-bold text-sm">MR</div>
+<div>
+<h4 class="font-title-md text-title-md text-primary text-base">Mark Reyes</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-xs">South Parking • Zone C</p>
+</div>
+</div>
+<div class="px-2 py-1 rounded bg-[#fff8e1] text-[#f57f17] flex items-center gap-1">
+<span class="text-[10px]">●</span>
+<span class="font-status-label text-status-label text-xs">Investigating</span>
+</div>
+</div>
+<div class="flex items-center gap-sm font-body-sm text-body-sm text-on-surface-variant text-xs">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span> Last check: 1m ago</span>
+</div>
+</div>
+<!-- Warden Card 4 -->
+<div class="bg-surface border border-[#e2e8f0] rounded-lg p-sm hover:bg-[#f1f5f9] cursor-pointer transition-colors shadow-sm">
+<div class="flex justify-between items-start mb-xs">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-tint text-on-primary flex items-center justify-center font-bold text-sm">SJ</div>
+<div>
+<h4 class="font-title-md text-title-md text-primary text-base">Sarah Jones</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-xs">East Wing • Zone D</p>
+</div>
+</div>
+<div class="px-2 py-1 rounded bg-[#e8f5e9] text-[#1b5e20] flex items-center gap-1">
+<span class="text-[10px]">●</span>
+<span class="font-status-label text-status-label text-xs">On Patrol</span>
+</div>
+</div>
+<div class="flex items-center gap-sm font-body-sm text-body-sm text-on-surface-variant text-xs">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span> Last check: 8m ago</span>
+</div>
+</div>
+</div>
+<!-- Mobile Action Area -->
+<div class="p-md border-t border-surface-variant bg-surface md:hidden mb-14">
+<button class="w-full bg-tertiary-container text-on-tertiary font-title-md text-title-md py-sm rounded-lg h-12 flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined" data-icon="campaign">campaign</span>
+                    Broadcast Message
+                </button>
+</div>
+</div>
+</main>
+<!-- Mobile Bottom Nav Bar -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface dark:bg-tertiary-container shadow-lg rounded-t-xl pb-6">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container px-4 py-1" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-status-label text-status-label mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container px-4 py-1" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span class="font-status-label text-status-label mt-1">Tasks</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-on-secondary-fixed-variant text-on-secondary-container dark:text-on-secondary rounded-xl px-4 py-1 scale-95 transition-all" href="#">
+<span class="material-symbols-outlined icon-fill" data-icon="security">security</span>
+<span class="font-status-label text-status-label mt-1">Status</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-primary-container px-4 py-1" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-status-label text-status-label mt-1">Profile</span>
+</a>
+</nav>
+
+
+</body></html>

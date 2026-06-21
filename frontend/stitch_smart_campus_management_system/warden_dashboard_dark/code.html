@@ -1,0 +1,297 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Warden Dashboard - Dark Mode</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#006a61",
+                        "tertiary": "#000000",
+                        "secondary-fixed-dim": "#6bd8cb",
+                        "surface-bright": "#f7f9fb",
+                        "on-secondary-fixed": "#00201d",
+                        "inverse-primary": "#bec6e0",
+                        "primary-fixed": "#dae2fd",
+                        "primary-container": "#131b2e",
+                        "on-primary-fixed": "#131b2e",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-surface": "#191c1e",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "on-error": "#ffffff",
+                        "surface": "#f7f9fb",
+                        "primary": "#000000",
+                        "surface-dim": "#d8dadc",
+                        "outline": "#76777d",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "secondary-container": "#86f2e4",
+                        "on-background": "#191c1e",
+                        "tertiary-fixed": "#d8e2ff",
+                        "on-tertiary-container": "#3980f4",
+                        "surface-variant": "#e0e3e5",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#e6e8ea",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "tertiary-container": "#001a42",
+                        "inverse-surface": "#2d3133",
+                        "on-primary-container": "#7c839b",
+                        "surface-container-low": "#f2f4f6",
+                        "primary-fixed-dim": "#bec6e0",
+                        "outline-variant": "#c6c6cd",
+                        "on-tertiary-fixed": "#001a42",
+                        "on-secondary-fixed-variant": "#005049",
+                        "surface-tint": "#565e74",
+                        "secondary-fixed": "#89f5e7",
+                        "on-secondary-container": "#006f66",
+                        "background": "#f7f9fb",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-container": "#eceef0",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#45464d",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#004395",
+                        "dark-bg": "#0f172a",
+                        "dark-surface": "#1e293b",
+                        "dark-surface-elevated": "#334155"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "lg": "24px",
+                        "gutter": "16px",
+                        "sm": "12px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "32px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "title-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "status-label": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "status-label": ["13px", { "lineHeight": "16px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-dark-bg text-on-error dark w-full min-h-screen font-body-lg flex flex-col md:flex-row">
+<!-- Navigation Drawer (Desktop) -->
+<nav class="hidden md:flex flex-col h-full w-[280px] fixed left-0 top-0 bg-dark-surface shadow-xl shadow-[rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out gap-base p-md z-40 border-r border-dark-surface-elevated">
+<div class="mb-xl flex items-center gap-sm p-sm">
+<span class="material-symbols-outlined filled text-headline-lg text-secondary-fixed">shield</span>
+<span class="font-headline-md text-headline-md font-bold text-on-error tracking-tight">SCMS</span>
+</div>
+<div class="flex items-center gap-sm mb-lg p-sm border-b border-dark-surface-elevated pb-md">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-tint">
+<img alt="Staff Member Avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a campus security warden in a dark navy uniform, neutral background, high contrast lighting suitable for a dark mode UI profile avatar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwfk8U_rm_P4qx53UwH8y1ZLhdW_xrAqTSsQ_wWg_bGOcWZjFc6k-vetPBmunaGq1wI33XCOsYgMk7iQdTjxLqJy5Z6YvuMPStyfGJo-XQT0iSxnwS30rv-M7SRU-xBJw9JGVObXnW_CqoE19xbf8YeCyfTpxH5FT5iUahANQzsVSH0R0qGIcr-isDTbgG_4mLihRj8z5mJ2SjefABQs5BtrJVz-ZPCaJ8XvAZPkR7WS-pHjNyhTThXcelaw7fQWx4ei1n78ccU4-z">
+</div>
+<div>
+<div class="font-title-md text-title-md text-on-error">Staff Member</div>
+<div class="font-body-sm text-body-sm text-surface-dim">Warden Office</div>
+<div class="font-status-label text-status-label text-secondary-fixed mt-base">Shift: Morning</div>
+</div>
+</div>
+<ul class="flex flex-col gap-base mt-md flex-grow">
+<li class="">
+<a class="flex items-center gap-sm p-sm bg-secondary-container text-on-secondary-container font-bold rounded-r-full transition-colors" href="#">
+<span class="material-symbols-outlined filled">home</span>
+<span class="font-body-lg text-body-lg">Home</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-sm p-sm text-surface-dim hover:bg-dark-surface-elevated rounded-r-full transition-colors" href="#">
+<span class="material-symbols-outlined">security</span>
+<span class="font-body-lg text-body-lg">Security Logs</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-sm p-sm text-surface-dim hover:bg-dark-surface-elevated rounded-r-full transition-colors" href="#">
+<span class="material-symbols-outlined">gate</span>
+<span class="font-body-lg text-body-lg">Gate Management</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-sm p-sm text-surface-dim hover:bg-dark-surface-elevated rounded-r-full transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-lg text-body-lg">Reports</span>
+</a>
+</li>
+<li class="mt-auto">
+<a class="flex items-center gap-sm p-sm text-surface-dim hover:bg-dark-surface-elevated rounded-r-full transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-lg text-body-lg">Settings</span>
+</a>
+</li>
+</ul>
+</nav>
+<!-- Top App Bar (Mobile) -->
+<header class="md:hidden flex justify-between items-center px-margin-mobile h-16 w-full bg-dark-surface sticky top-0 z-40 border-b border-dark-surface-elevated shadow-sm">
+<button class="p-sm text-on-error hover:bg-dark-surface-elevated rounded-full transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="font-headline-md text-headline-md font-bold text-on-error tracking-tight">SCMS</div>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-tint border border-outline-variant">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A professional headshot of a campus security warden in a dark navy uniform, neutral background, high contrast lighting suitable for a dark mode UI profile avatar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8TkMLXoWr3T_IcVsBVxR4NJd863Yk3xRiqn_0xEqSiX5jU4ivXhIbWQtcAw-u6BJvdTly_O6FtmJaVsV8BIuxITJFTeocptxqW7iEEGkRbbkaZRUWX9BQsXeTCfqDmaYqTCZK9C0g39VeLS1dSTXHy61blw42j6vHIqzV1F-6eGSxxGiWUoJibNoK5iTVd_GlCqzrV0Z0rRe_mjV6-1QstdINocHEFi3tbDjCOQ8rewdO5e_dx7CpZnsxIsxzhXoAlumtn0aqtxZl">
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow md:ml-[280px] p-margin-mobile md:p-margin-desktop pb-32 md:pb-margin-desktop w-full max-w-7xl mx-auto overflow-y-auto">
+<header class="mb-lg flex justify-between items-end">
+<div>
+<h1 class="font-display-lg text-display-lg md:text-display-lg text-on-error mb-xs">[Warden] Dashboard (Dark)</h1>
+<p class="font-body-lg text-body-lg text-surface-dim">Morning Shift overview &amp; active alerts.</p>
+</div>
+<div class="hidden md:flex items-center gap-sm bg-dark-surface px-md py-sm rounded-full border border-dark-surface-elevated">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed animate-pulse"></span>
+<span class="font-status-label text-status-label text-secondary-fixed">System Online</span>
+</div>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter md:gap-lg">
+<!-- Assigned Zone (Featured) -->
+<section class="col-span-1 md:col-span-8 bg-dark-surface rounded-xl p-lg border border-dark-surface-elevated shadow-lg relative overflow-hidden group hover:border-outline transition-colors">
+<div class="absolute inset-0 bg-gradient-to-br from-tertiary-container/20 to-transparent pointer-events-none"></div>
+<div class="flex justify-between items-start mb-md relative z-10">
+<div>
+<h2 class="font-title-md text-title-md text-on-error flex items-center gap-sm mb-xs">
+<span class="material-symbols-outlined text-tertiary-fixed-dim">map</span>
+                            Assigned Zone: North Campus
+                        </h2>
+<p class="font-body-sm text-body-sm text-surface-dim">Current status and coverage.</p>
+</div>
+<div class="bg-secondary/20 px-sm py-xs rounded-full border border-secondary/30 flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed"></span>
+<span class="font-status-label text-status-label text-secondary-fixed">Secure</span>
+</div>
+</div>
+<div class="w-full h-64 bg-dark-surface-elevated rounded-lg overflow-hidden border border-outline/20 relative mb-md">
+<img class="w-full h-full object-cover opacity-80" data-alt="A dark mode stylized map interface showing a university campus with glowing neon blue and green routes, security checkpoints marked with subtle pulse animations, deep charcoal background." data-location="University Campus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHk5k13mmi6rOQNIP0J1HEh9Pn2B2gejAoudT_nzETPku7HlphtKaZdWVtZIZ4K9pQkxnHulX9FkvofFJOCeQa0aBczh9XIcnTLPUly8BGwySbiIlheX8rnz64XI3-WwnBXe0XJcb3ZDWtRJlkoS5dBS8gkI9-GnglEbDrEdT4QrIpRciMP6RVeqreXIYXTHBTNWqwE5Krw4ZkABWYCHsel2SuEMQ2T6C1OPGbwj4c3m9oB5YduSGOcp18A75jDclkczVba8untckr">
+<div class="absolute bottom-md right-md bg-dark-bg/80 backdrop-blur-md px-sm py-xs rounded-md border border-dark-surface-elevated flex gap-sm items-center">
+<span class="material-symbols-outlined text-on-error text-[16px]">location_on</span>
+<span class="font-body-sm text-body-sm text-on-error">3 Patrols Active</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-sm relative z-10">
+<div class="bg-dark-bg rounded-lg p-sm border border-dark-surface-elevated text-center">
+<div class="font-headline-md text-headline-md text-on-error">12</div>
+<div class="font-label-caps text-label-caps text-surface-dim uppercase">Gates Open</div>
+</div>
+<div class="bg-dark-bg rounded-lg p-sm border border-dark-surface-elevated text-center">
+<div class="font-headline-md text-headline-md text-on-error">45</div>
+<div class="font-label-caps text-label-caps text-surface-dim uppercase">Visitors</div>
+</div>
+<div class="bg-dark-bg rounded-lg p-sm border border-dark-surface-elevated text-center">
+<div class="font-headline-md text-headline-md text-secondary-fixed">100%</div>
+<div class="font-label-caps text-label-caps text-surface-dim uppercase">Uptime</div>
+</div>
+</div>
+</section>
+<!-- Active Alerts (Sidebar) -->
+<section class="col-span-1 md:col-span-4 flex flex-col gap-gutter md:gap-lg">
+<div class="bg-dark-surface rounded-xl p-md border border-dark-surface-elevated shadow-lg flex-grow">
+<h2 class="font-title-md text-title-md text-on-error flex items-center gap-sm mb-md pb-xs border-b border-dark-surface-elevated">
+<span class="material-symbols-outlined text-error">warning</span>
+                        Active Alerts
+                        <span class="ml-auto bg-error/20 text-error font-status-label px-2 py-0.5 rounded-full text-xs">2</span>
+</h2>
+<ul class="flex flex-col gap-sm">
+<li class="bg-dark-bg p-sm rounded-lg border-l-2 border-error hover:bg-dark-surface-elevated transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-body-sm text-body-sm font-bold text-on-error group-hover:text-error transition-colors">Unauthorized Access</span>
+<span class="font-label-caps text-label-caps text-surface-dim">10:42 AM</span>
+</div>
+<p class="font-body-sm text-body-sm text-surface-dim">Gate B - East Wing. ID badge failed.</p>
+</li>
+<li class="bg-dark-bg p-sm rounded-lg border-l-2 border-outline-variant hover:bg-dark-surface-elevated transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-body-sm text-body-sm font-bold text-on-error">Camera Offline</span>
+<span class="font-label-caps text-label-caps text-surface-dim">09:15 AM</span>
+</div>
+<p class="font-body-sm text-body-sm text-surface-dim">Zone 4 - Parking Structure Level 2.</p>
+</li>
+</ul>
+<button class="w-full mt-md py-sm px-md border border-dark-surface-elevated rounded-lg text-on-error font-body-sm hover:bg-dark-surface-elevated transition-colors text-center">View All Logs</button>
+</div>
+<!-- Quick Actions -->
+<div class="bg-dark-surface rounded-xl p-md border border-dark-surface-elevated shadow-lg">
+<h2 class="font-title-md text-title-md text-on-error flex items-center gap-sm mb-md">
+<span class="material-symbols-outlined text-tertiary-fixed-dim">bolt</span>
+                        Quick Actions
+                    </h2>
+<div class="grid grid-cols-2 gap-sm">
+<button class="bg-tertiary-container text-tertiary-fixed flex flex-col items-center justify-center p-md rounded-lg hover:bg-tertiary-container/80 transition-colors border border-tertiary-fixed/20 h-24">
+<span class="material-symbols-outlined mb-xs text-[28px]">lock</span>
+<span class="font-body-sm text-body-sm font-semibold">Lockdown Zone</span>
+</button>
+<button class="bg-dark-bg text-on-error flex flex-col items-center justify-center p-md rounded-lg hover:bg-dark-surface-elevated transition-colors border border-dark-surface-elevated h-24">
+<span class="material-symbols-outlined mb-xs text-[28px]">add_alert</span>
+<span class="font-body-sm text-body-sm">Dispatch Unit</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 pb-safe bg-dark-surface shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)] rounded-t-xl border-t border-dark-surface-elevated">
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined filled">dashboard</span>
+<span class="font-status-label text-status-label mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-surface-dim p-2 hover:bg-dark-surface-elevated transition-all rounded-lg active:scale-95" href="#">
+<span class="material-symbols-outlined">map</span>
+<span class="font-status-label text-status-label mt-1">Map</span>
+</a>
+<a class="flex flex-col items-center justify-center text-surface-dim p-2 hover:bg-dark-surface-elevated transition-all rounded-lg active:scale-95" href="#">
+<span class="material-symbols-outlined">assignment</span>
+<span class="font-status-label text-status-label mt-1">Tasks</span>
+</a>
+<a class="flex flex-col items-center justify-center text-surface-dim p-2 hover:bg-dark-surface-elevated transition-all rounded-lg active:scale-95" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-status-label text-status-label mt-1">Profile</span>
+</a>
+</nav>
+
+
+</body></html>
