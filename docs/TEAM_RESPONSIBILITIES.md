@@ -112,9 +112,9 @@ All user management endpoints are implemented. All routes are ADMIN-only.
 
 ---
 
-### 3. Campus module (`src/campus/`) ⬜ TODO
+### 3. Campus module (`src/campus/`) ✅ COMPLETE
 
-- `campus.module.ts`, `campus.controller.ts`, `campus.service.ts`
+All four routes implemented, registered, and verified against the live seeded DB.
 
 #### Endpoints
 
@@ -122,14 +122,12 @@ All user management endpoints are implemented. All routes are ADMIN-only.
 |--------|------|--------|-----------------|
 | `GET` | `/campus/map` | `@Public()` | `{ zones: GeoJSON.FeatureCollection, gates: Gate[], landmarks: Landmark[] }` |
 | `GET` | `/campus/zones` | `@Public()` | `GeoJSON.FeatureCollection` (each zone's `geojson` + `id`, `name`, `label`, `capacity`, `type` in `properties`) |
-| `GET` | `/campus/gates` | `@Public()` | `Gate[]` |
-| `GET` | `/campus/landmarks` | `@Public()` | `Landmark[]` |
+| `GET` | `/campus/gates` | `@Public()` | `{ gates: Gate[] }` |
+| `GET` | `/campus/landmarks` | `@Public()` | `{ landmarks: Landmark[] }` |
 
-#### Tasks checklist
-- [ ] `CampusService.getMapBundle()` — single Prisma query per table, assembled into one object
-- [ ] `CampusService.getZonesAsGeoJSON()` — map `Zone.geojson` + metadata into a `FeatureCollection`
-- [ ] Mark all four routes `@Public()`
-- [ ] Register `CampusModule` in `app.module.ts`
+#### Files
+- `campus.module.ts`, `campus.controller.ts`, `campus.service.ts`
+- `@Public()` applied at the controller level (covers all four routes)
 
 ---
 

@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Role } from '../../generated/prisma';
-import { SafeUser } from '../common/constants/safe-user.constant';
+import type { SafeUser } from '../common/constants/safe-user.constant';
 import { WardenService } from './warden.service';
 import { WardenCheckinDto } from './dto/warden-checkin.dto';
 

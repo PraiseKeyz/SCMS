@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Role } from '../../generated/prisma';
-import { SafeUser } from '../common/constants/safe-user.constant';
+import type { SafeUser } from '../common/constants/safe-user.constant';
 import { ParkingService } from './parking.service';
 import { UpdateZoneStatusDto } from './dto/update-zone-status.dto';
 import { NearestZoneQueryDto } from './dto/nearest-zone-query.dto';

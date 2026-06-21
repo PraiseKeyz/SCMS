@@ -336,7 +336,7 @@ All routes are prefixed `/api/v1/`.
 | `GET` | `/users/:id` | ADMIN | Get a specific user |
 | `DELETE` | `/users/:id` | ADMIN | Remove a user |
 
-#### Campus ⬜
+#### Campus ✅
 | Method | Path | Access | Description |
 |--------|------|--------|-------------|
 | `GET` | `/campus/map` | Public | Full map bundle (zones + gates + landmarks) |
@@ -509,10 +509,10 @@ database via `GET /campus/map`.
 1. ✅ DB + Prisma — schema migrated, seed data in Neon
 2. ✅ Auth module — login, JWT guard, change-password
 3. ✅ Users module — CRUD (ADMIN only)
-4. ⬜ Campus module — map bundle endpoints
-5. ⬜ Parking module — zone status CRUD + WebSocket gateway
-6. ⬜ Alerts module — broadcast + incident + warden checkin
-7. ⬜ Recommendations module — heuristic scoring functions
+4. ✅ Campus module — map bundle endpoints
+5. ✅ Parking module — zone status CRUD + WebSocket gateway
+6. ✅ Alerts module — broadcast + incident + warden checkin
+7. ✅ Recommendations module — heuristic scoring functions
 8. ⬜ Flutter core — API service, auth flow, Mapbox map
 9. ⬜ Flutter visitor flow — landmark search + navigation
 10. ⬜ Flutter driver flow — zone overlay + nearest zone

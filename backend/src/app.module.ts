@@ -13,6 +13,7 @@ import { RolesGuard } from './auth/guards/roles.guard.js';
 import { ParkingModule } from './parking/parking.module.js';
 import { AlertsModule } from './alerts/alerts.module.js';
 import { RecommendationsModule } from './recommendations/recommendations.module.js';
+import { CampusModule } from './campus/campus.module.js';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { RecommendationsModule } from './recommendations/recommendations.module.
     ParkingModule,
     AlertsModule,
     RecommendationsModule,
+    CampusModule,
   ],
   controllers: [AppController],
   providers: [

@@ -34,7 +34,11 @@ export class AlertsService {
       data: { ...dto, reportedById },
     });
 
-    this.gateway.emitIncident(incident);
+    this.gateway.emitIncident({
+      type: incident.type,
+      latitude: Number(incident.latitude),
+      longitude: Number(incident.longitude),
+    });
     return incident;
   }
 
