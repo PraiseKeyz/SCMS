@@ -31,8 +31,13 @@ class _LandmarkDetailsScreenState extends State<LandmarkDetailsScreen> {
         AppNavigationDestination(label: 'Parking', icon: Icons.local_parking, route: '/zone-list'),
         AppNavigationDestination(label: 'Profile', icon: Icons.person, route: '/role-select'),
       ],
-      body: SingleChildScrollView(
-        child: Column(
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await Future.delayed(const Duration(milliseconds: 500));
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
           children: [
             // Hero Image
             SizedBox(
@@ -194,6 +199,7 @@ class _LandmarkDetailsScreenState extends State<LandmarkDetailsScreen> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
