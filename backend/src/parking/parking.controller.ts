@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { Role } from '../../generated/prisma';
 import type { SafeUser } from '../common/constants/safe-user.constant';
 import { ParkingService } from './parking.service';
@@ -11,6 +12,7 @@ import { NearestZoneQueryDto } from './dto/nearest-zone-query.dto';
 export class ParkingController {
   constructor(private readonly parkingService: ParkingService) {}
 
+  @Public()
   @Get('zones')
   async getZones() {
     const zones = await this.parkingService.getZonesWithStatus();
@@ -32,6 +34,7 @@ export class ParkingController {
     return { message: 'Zone status updated', data: { status } };
   }
 
+  @Public()
   @Get('nearest')
   async nearest(@Query() query: NearestZoneQueryDto) {
     const result = await this.parkingService.getNearestZone(

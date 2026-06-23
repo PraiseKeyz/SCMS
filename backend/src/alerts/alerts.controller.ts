@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { Role } from '../../generated/prisma';
 import type { SafeUser } from '../common/constants/safe-user.constant';
 import { AlertsService } from './alerts.service';
@@ -31,6 +32,7 @@ export class AlertsController {
     return { message: 'Incident logged', data: { incident } };
   }
 
+  @Public()
   @Get('active')
   async getActive() {
     const alerts = await this.alertsService.getActiveAlerts();
