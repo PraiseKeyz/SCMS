@@ -107,6 +107,14 @@ class _ParkingAvailabilityScreenState extends ConsumerState<ParkingAvailabilityS
     return ResponsiveScaffold(
       title: 'Parking Availability',
       subtitle: 'Central Hub',
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: () {
+            ref.invalidate(parkingZonesProvider);
+          },
+        ),
+      ],
       isWarden: false,
       currentIndex: 2,
       destinations: const [
