@@ -1,6 +1,11 @@
 # SCMS — System Architecture
 
 > Smart Campus Mobility System · Kingdom Hack 3.0 · Smart City Innovation Track
+>
+> Built and modeled specifically for **Redemption City** (RCCG camp ground, Lagos–Ibadan
+> Expressway, 6.825889°N 3.462819°E) — every zone, gate, and landmark in the data model
+> below reflects the camp's actual layout (Main Car Park, Holy Ghost Auditorium Grounds,
+> Holy Ghost Auditorium, Redemption City Medical Centre, Camp Food Court, Admin Secretariat).
 
 ## 1. High-Level System Diagram
 
