@@ -38,6 +38,28 @@ class AlertsNotifier extends StateNotifier<AsyncValue<void>> {
       rethrow;
     }
   }
+
+  Future<void> resolveIncident(String id) async {
+    state = const AsyncValue.loading();
+    try {
+      await _repository.resolveIncident(id);
+      state = const AsyncValue.data(null);
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+      rethrow;
+    }
+  }
+
+  Future<void> checkin(String zoneId) async {
+    state = const AsyncValue.loading();
+    try {
+      await _repository.checkin(zoneId);
+      state = const AsyncValue.data(null);
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+      rethrow;
+    }
+  }
 }
 
 final alertsNotifierProvider = StateNotifierProvider<AlertsNotifier, AsyncValue<void>>((ref) {

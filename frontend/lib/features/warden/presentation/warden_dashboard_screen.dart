@@ -2,10 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme.dart';
 import '../../../core/widgets/responsive_scaffold.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:intl/intl.dart';
 import '../../../core/widgets/status_badge.dart';
 
-class WardenDashboardScreen extends StatelessWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../parking/providers/parking_provider.dart';
+import '../../alerts/providers/alerts_provider.dart';
+
+class WardenDashboardScreen extends ConsumerStatefulWidget {
   const WardenDashboardScreen({Key? key}) : super(key: key);
+
+  @override
+  ConsumerState<WardenDashboardScreen> createState() => _WardenDashboardScreenState();
+}
+
+class _WardenDashboardScreenState extends ConsumerState<WardenDashboardScreen> {
+  String? _selectedZoneId;
+  String? _assignedZoneId;
+  bool _isCheckingIn = false;
+
+  final _storage = const FlutterSecureStorage();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAssignedZone();
+  }
+
+  Future<void> _loadAssignedZone() async {
+    final zoneId = await _storage.read(key: 'assigned_zone_id');
+    if (zoneId != null && mounted) {
+      setState(() => _assignedZoneId = zoneId);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,27 +51,42 @@ class WardenDashboardScreen extends StatelessWidget {
         AppNavigationDestination(label: 'Status', icon: Icons.shield, route: '/warden-dashboard/deployment'),
       ],
       actions: [
-        Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppTheme.error,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+        Consumer(builder: (context, ref, _) {
+          final alertsAsync = ref.watch(activeAlertsProvider);
+          final alertCount = alertsAsync.value?.length ?? 0;
+          if (alertCount == 0) return const SizedBox();
+          return InkWell(
+            onTap: () => context.push('/alerts-list'),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppTheme.error,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.notifications_active, size: 16, color: AppTheme.onError),
+                    const SizedBox(width: 4),
+                    Text('$alertCount Active Alert${alertCount == 1 ? '' : 's'}', style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(color: AppTheme.onError)),
+                  ],
+                ),
+              ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.notifications_active, size: 16, color: AppTheme.onError),
-                const SizedBox(width: 4),
-                Text('2 Active Alerts', style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(color: AppTheme.onError)),
-              ],
-            ),
-          ),
-        ),
+          );
+        }),
       ],
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          // Invalidate providers to refetch data
+          ref.invalidate(parkingZonesProvider);
+          await ref.read(parkingZonesProvider.future);
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1024),
@@ -78,7 +123,7 @@ class WardenDashboardScreen extends StatelessWidget {
                             ],
                           ),
                         const SizedBox(height: 16),
-                        _buildRecentIncidentsList(),
+                        _buildRecentIncidentsList(context),
                       ],
                     );
                   },
@@ -88,10 +133,33 @@ class WardenDashboardScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ),
+  );
+}
+
+  Future<void> _handleCheckIn() async {
+    if (_selectedZoneId == null) return;
+    setState(() => _isCheckingIn = true);
+    try {
+      await ref.read(alertsNotifierProvider.notifier).checkin(_selectedZoneId!);
+      await _storage.write(key: 'assigned_zone_id', value: _selectedZoneId!);
+      setState(() => _assignedZoneId = _selectedZoneId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Checked in successfully')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to check in: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isCheckingIn = false);
+    }
   }
 
   Widget _buildAssignedZoneCard() {
+    final zonesAsync = ref.watch(parkingZonesProvider);
+    final zones = zonesAsync.value ?? [];
+
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.surface,
@@ -112,28 +180,75 @@ class WardenDashboardScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, color: AppTheme.secondary),
-                    const SizedBox(width: 8),
-                    Text('My Assigned Zone', style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(color: AppTheme.onSurface)),
-                  ],
+                Expanded(
+                  child: Row(
+                    children: [
+                      const Icon(Icons.location_on, color: AppTheme.secondary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _assignedZoneId != null ? 'My Assigned Zone' : 'Select Zone to Check In', 
+                          style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(color: AppTheme.onSurface),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const StatusBadge(status: BadgeStatus.secure, label: 'Secure'),
+                if (_assignedZoneId != null)
+                  Row(
+                    children: [
+                      const StatusBadge(status: BadgeStatus.secure, label: 'Checked In'),
+                      const SizedBox(width: 4),
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        icon: const Icon(Icons.edit, size: 20, color: AppTheme.outline),
+                        onPressed: () => setState(() => _assignedZoneId = null),
+                        tooltip: 'Change Zone',
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(16),
-            child: LayoutBuilder(
+            child: _assignedZoneId == null
+              ? Column(
+                  children: [
+                    DropdownButtonFormField<String>(
+                      isExpanded: true,
+                      value: _selectedZoneId,
+                      hint: const Text('Select a Zone'),
+                      items: zones.map((z) => DropdownMenuItem(value: z.id, child: Text(z.name))).toList(),
+                      onChanged: (val) => setState(() => _selectedZoneId = val),
+                      decoration: const InputDecoration(border: OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: (_selectedZoneId == null || _isCheckingIn) ? null : _handleCheckIn,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 48),
+                        backgroundColor: AppTheme.primary,
+                        foregroundColor: AppTheme.onPrimary,
+                      ),
+                      child: _isCheckingIn 
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : const Text('Check In'),
+                    ),
+                  ],
+                )
+              : LayoutBuilder(
               builder: (context, constraints) {
                 final isWide = constraints.maxWidth > 400;
+                final assignedZoneName = zones.where((z) => z.id == _assignedZoneId).firstOrNull?.name ?? 'Unknown Zone';
                 final infoContent = Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('CURRENT LOCATION', style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(color: AppTheme.onSurfaceVariant)),
                     const SizedBox(height: 4),
-                    Text('North Campus Gate 4', style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(assignedZoneName, style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 16),
                     Row(
                       children: [
@@ -150,7 +265,7 @@ class WardenDashboardScreen extends StatelessWidget {
                               children: [
                                 Text('STAFF PRESENT', style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(color: AppTheme.onSurfaceVariant)),
                                 const SizedBox(height: 4),
-                                Text('4 Personnel', style: AppTheme.lightTheme.textTheme.titleMedium),
+                                Text('Active', style: AppTheme.lightTheme.textTheme.titleMedium),
                               ],
                             ),
                           ),
@@ -169,7 +284,7 @@ class WardenDashboardScreen extends StatelessWidget {
                               children: [
                                 Text('LAST SWEEP', style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(color: AppTheme.onSurfaceVariant)),
                                 const SizedBox(height: 4),
-                                Text('12 Mins Ago', style: AppTheme.lightTheme.textTheme.titleMedium),
+                                Text('Just now', style: AppTheme.lightTheme.textTheme.titleMedium),
                               ],
                             ),
                           ),
@@ -179,53 +294,11 @@ class WardenDashboardScreen extends StatelessWidget {
                   ],
                 );
 
-                final mapAbstract = Container(
-                  height: 160,
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppTheme.outlineVariant),
-                  ),
-                  child: Stack(
-                    children: [
-                      // Abstract map markers
-                      Positioned(top: 40, left: 40, child: Container(width: 12, height: 12, decoration: BoxDecoration(color: AppTheme.secondary, borderRadius: BorderRadius.circular(2)))),
-                      Positioned(bottom: 50, right: 40, child: Container(width: 12, height: 12, decoration: BoxDecoration(color: AppTheme.secondary, borderRadius: BorderRadius.circular(2)))),
-                      Center(
-                        child: Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            color: AppTheme.tertiaryContainer,
-                            borderRadius: BorderRadius.circular(4),
-                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4)],
-                          ),
-                          child: const Icon(Icons.person, color: AppTheme.onTertiary, size: 16),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 8,
-                        right: 8,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppTheme.surface.withOpacity(0.8),
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: AppTheme.outlineVariant),
-                          ),
-                          child: Text('Zone Beta-4', style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(color: AppTheme.onSurfaceVariant)),
-                        ),
-                      )
-                    ],
-                  ),
-                );
-
                 if (isWide) {
                   return Row(
                     children: [
                       Expanded(child: infoContent),
                       const SizedBox(width: 24),
-                      Expanded(child: mapAbstract),
                     ],
                   );
                 } else {
@@ -233,7 +306,6 @@ class WardenDashboardScreen extends StatelessWidget {
                     children: [
                       infoContent,
                       const SizedBox(height: 16),
-                      mapAbstract,
                     ],
                   );
                 }
@@ -317,7 +389,9 @@ class WardenDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentIncidentsList() {
+  Widget _buildRecentIncidentsList(BuildContext context) {
+    final alertsAsync = ref.watch(activeAlertsProvider);
+
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.surface,
@@ -340,36 +414,46 @@ class WardenDashboardScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.history, color: AppTheme.onSurfaceVariant),
+                    const Icon(Icons.campaign, color: AppTheme.onSurfaceVariant),
                     const SizedBox(width: 8),
-                    Text('Recent Incidents', style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(color: AppTheme.onSurface)),
+                    Text('Active Alerts', style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(color: AppTheme.onSurface)),
                   ],
                 ),
-                Text('View All', style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(color: AppTheme.secondary)),
+                InkWell(
+                  onTap: () => context.push('/alerts-list'),
+                  child: Text('View All', style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(color: AppTheme.secondary)),
+                ),
               ],
             ),
           ),
-          _buildIncidentItem(
-            title: 'Unauthorized Access Attempt',
-            time: '10 mins ago',
-            description: 'Individual lacking proper credentials attempted entry at Service Gate 2. Situation contained.',
-            priority: 'High Priority',
-            isHighPriority: true,
-            location: 'Service Gate 2',
-            icon: Icons.warning,
-            iconBg: AppTheme.errorContainer,
-            iconColor: AppTheme.onErrorContainer,
-          ),
-          _buildIncidentItem(
-            title: 'Maintenance Blocking Path',
-            time: '45 mins ago',
-            description: 'Routine utility maintenance blocking primary pedestrian pathway near Engineering Hall.',
-            priority: 'Low Priority',
-            isHighPriority: false,
-            location: 'Engineering Walkway',
-            icon: Icons.construction,
-            iconBg: const Color(0xFFFEF3C7),
-            iconColor: const Color(0xFF92400E),
+          alertsAsync.when(
+            data: (alerts) {
+              if (alerts.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: Center(child: Text('No active alerts', style: TextStyle(color: AppTheme.outline))),
+                );
+              }
+              final topAlerts = alerts.take(3).toList();
+              return Column(
+                children: topAlerts.map((alert) {
+                  final df = DateFormat('MMM d, h:mm a');
+                  return _buildIncidentItem(
+                    title: 'Broadcast Alert',
+                    time: df.format(alert.expiresAt.toLocal()),
+                    description: alert.message,
+                    priority: 'High Priority',
+                    isHighPriority: true,
+                    location: 'Campus Wide',
+                    icon: Icons.warning_amber,
+                    iconBg: AppTheme.errorContainer,
+                    iconColor: AppTheme.onErrorContainer,
+                  );
+                }).toList(),
+              );
+            },
+            loading: () => const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator())),
+            error: (e, st) => Padding(padding: const EdgeInsets.all(16), child: Text('Error: $e')),
           ),
         ],
       ),

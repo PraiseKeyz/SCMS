@@ -18,7 +18,7 @@ class ApiAuthRepository implements AuthRepository {
         data: {'email': email, 'password': password},
       );
       
-      final data = response.data['data'];
+      final data = response.data;
       final String accessToken = data['accessToken'];
       final user = SafeUser.fromJson(data['user']);
       
@@ -26,7 +26,7 @@ class ApiAuthRepository implements AuthRepository {
       
       return {'user': user, 'accessToken': accessToken};
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Login failed');
+      throw Exception(e.message ?? 'Login failed');
     }
   }
 
@@ -41,9 +41,28 @@ class ApiAuthRepository implements AuthRepository {
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
-      return SafeUser.fromJson(response.data['data']['user']);
+      return SafeUser.fromJson(response.data['user']);
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Failed to get current user');
+      throw Exception(e.message ?? 'Failed to get current user');
+    }
+  }
+
+  @override
+  Future<void> changePassword(String currentPassword, String newPassword) async {
+    try {
+      final token = await _storage.read(key: 'accessToken');
+      if (token == null) throw Exception('No token found');
+
+      await _dio.patch(
+        '${AppConfig.apiBaseUrl}/auth/change-password',
+        data: {
+          'currentPassword': currentPassword,
+          'newPassword': newPassword,
+        },
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+    } on DioException catch (e) {
+      throw Exception(e.message ?? 'Failed to change password');
     }
   }
 

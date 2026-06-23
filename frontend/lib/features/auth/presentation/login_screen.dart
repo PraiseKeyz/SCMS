@@ -18,6 +18,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   late TextEditingController _passwordController;
   bool _obscurePassword = true;
   bool _rememberMe = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -42,6 +43,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final email = _emailController.text;
     final password = _passwordController.text;
     if (email.isNotEmpty && password.isNotEmpty) {
+      setState(() => _isLoading = true);
       try {
         await ref.read(authNotifierProvider.notifier).login(email, password);
         final user = ref.read(currentUserProvider);
@@ -60,6 +62,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
           );
         }
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
       }
     }
   }
@@ -203,14 +207,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             const SizedBox(height: 32),
 
                             ElevatedButton(
-                              onPressed: _handleLogin,
+                              onPressed: _isLoading ? null : _handleLogin,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppTheme.tertiaryContainer,
                                 foregroundColor: AppTheme.onTertiary,
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
-                              child: const Text('Login', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              child: _isLoading 
+                                ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                : const Text('Login', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                             ),
                             
                             const SizedBox(height: 32),

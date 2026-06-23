@@ -3,8 +3,11 @@ import '../../../core/theme.dart';
 import '../../../core/widgets/responsive_scaffold.dart';
 import 'package:go_router/go_router.dart';
 
+import '../domain/models/campus_models.dart';
+
 class LandmarkDetailsScreen extends StatefulWidget {
-  const LandmarkDetailsScreen({Key? key}) : super(key: key);
+  final Landmark? landmark;
+  const LandmarkDetailsScreen({Key? key, this.landmark}) : super(key: key);
 
   @override
   State<LandmarkDetailsScreen> createState() => _LandmarkDetailsScreenState();
@@ -15,8 +18,10 @@ class _LandmarkDetailsScreenState extends State<LandmarkDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final title = widget.landmark?.name ?? 'Main Library';
+    final category = widget.landmark?.category ?? 'Library';
     return ResponsiveScaffold(
-      title: 'Landmark Details',
+      title: title,
       subtitle: 'Campus Directory',
       isWarden: false,
       currentIndex: 1, // Map
@@ -53,7 +58,7 @@ class _LandmarkDetailsScreenState extends State<LandmarkDetailsScreen> {
                     bottom: 16,
                     left: 16,
                     child: Text(
-                      'Main Library',
+                      title,
                       style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
                         color: AppTheme.onPrimary,
                         fontWeight: FontWeight.bold,
@@ -119,7 +124,7 @@ class _LandmarkDetailsScreenState extends State<LandmarkDetailsScreen> {
                   Text('About', style: AppTheme.lightTheme.textTheme.titleMedium),
                   const SizedBox(height: 8),
                   Text(
-                    'The central hub for academic resources, featuring quiet study zones, collaborative workspaces, and an extensive physical and digital collection. Located in the heart of the North Campus.',
+                    'Category: $category\n\nThe central hub for academic resources, featuring quiet study zones, collaborative workspaces, and an extensive physical and digital collection. Located in the heart of the North Campus.',
                     style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.onSurfaceVariant, height: 1.5),
                   ),
                   const SizedBox(height: 24),

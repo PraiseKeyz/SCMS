@@ -22,10 +22,10 @@ class ApiParkingRepository implements ParkingRepository {
         '${AppConfig.apiBaseUrl}/parking/zones',
         options: await _getAuthOptions(),
       );
-      final List data = response.data['data'];
+      final List data = response.data['zones'];
       return data.map((e) => ZoneWithStatus.fromJson(e)).toList();
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Failed to get parking zones');
+      throw Exception(e.message ?? 'Failed to get parking zones');
     }
   }
 
@@ -43,9 +43,9 @@ class ApiParkingRepository implements ParkingRepository {
         data: {'status': statusString},
         options: await _getAuthOptions(),
       );
-      return ZoneStatus.fromJson(response.data['data']);
+      return ZoneStatus.fromJson(response.data['status']);
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Failed to update zone status');
+      throw Exception(e.message ?? 'Failed to update zone status');
     }
   }
 
@@ -57,9 +57,9 @@ class ApiParkingRepository implements ParkingRepository {
         queryParameters: {'lat': lat, 'lng': lng},
         options: await _getAuthOptions(),
       );
-      return NearestZoneRecommendation.fromJson(response.data['data']);
+      return NearestZoneRecommendation.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Failed to get nearest zone');
+      throw Exception(e.message ?? 'Failed to get nearest zone');
     }
   }
 }

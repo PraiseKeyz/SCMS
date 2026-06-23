@@ -74,9 +74,12 @@ class ResponsiveScaffold extends StatelessWidget {
             onTap: () {},
           ),
           ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () {},
+            leading: const Icon(Icons.lock_reset),
+            title: const Text('Change Password'),
+            onTap: () {
+              context.pop(); // Close drawer
+              context.push('/change-password');
+            },
           ),
           const Spacer(),
           const Divider(),
@@ -106,8 +109,6 @@ class ResponsiveScaffold extends StatelessWidget {
       ) : null,
       title: Row(
         children: [
-          if (!context.canPop()) const Icon(Icons.menu, color: AppTheme.onSurfaceVariant),
-          if (!context.canPop()) const SizedBox(width: 16),
           Text('SCMS', style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(color: AppTheme.primary, fontWeight: FontWeight.bold)),
         ],
       ),
@@ -137,10 +138,7 @@ class ResponsiveScaffold extends StatelessWidget {
       leading: context.canPop() ? IconButton(
         icon: const Icon(Icons.arrow_back, color: AppTheme.primary),
         onPressed: () => context.pop(),
-      ) : IconButton(
-        icon: const Icon(Icons.menu, color: AppTheme.primary),
-        onPressed: () {},
-      ),
+      ) : const SizedBox.shrink(),
       actions: [
         if (actions != null) ...actions!,
         Padding(

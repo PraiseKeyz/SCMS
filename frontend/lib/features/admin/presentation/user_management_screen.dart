@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/admin_provider.dart';
 import '../../../core/theme.dart';
 import '../../../core/widgets/responsive_scaffold.dart';
 
-class UserManagementScreen extends StatefulWidget {
+class UserManagementScreen extends ConsumerStatefulWidget {
   const UserManagementScreen({Key? key}) : super(key: key);
 
   @override
-  State<UserManagementScreen> createState() => _UserManagementScreenState();
+  ConsumerState<UserManagementScreen> createState() => _UserManagementScreenState();
 }
 
-class _UserManagementScreenState extends State<UserManagementScreen> {
+class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
   @override
   Widget build(BuildContext context) {
+    final usersAsync = ref.watch(usersProvider);
+
     return ResponsiveScaffold(
       title: 'User Management',
       subtitle: 'Admin Portal',
@@ -121,19 +125,61 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                         else if (constraints.maxWidth > 800) crossAxisCount = 3;
                         else if (constraints.maxWidth > 600) crossAxisCount = 2;
 
-                        return GridView.count(
-                          crossAxisCount: crossAxisCount,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          childAspectRatio: 0.85,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          children: [
-                            _buildUserCard('JD', 'John Doe', 'System Admin', Icons.admin_panel_settings, 'Active', Colors.green, '2h ago'),
-                            _buildUserCard('AS', 'Alice Smith', 'Chief Warden', Icons.local_police, 'Active', Colors.green, '5m ago'),
-                            _buildUserCard('RJ', 'Robert Jones', 'Gate Warden', Icons.badge, 'Inactive', Colors.orange, '2d ago'),
-                            _buildUserCard('MK', 'Maria Kim', 'Security Admin', Icons.security, 'Active', Colors.green, '1h ago'),
-                          ],
+                        return usersAsync.when(
+                          data: (users) {
+                            if (users.isEmpty) return const Center(child: Text('No users found.'));
+                            return GridView.builder(
+                              itemCount: users.length,
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 16,
+                                childAspectRatio: 0.85,
+                              ),
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                final user = users[index];
+                                final initials = user.name.isNotEmpty ? user.name.substring(0, 1).toUpperCase() : '?';
+                                IconData roleIcon = Icons.person;
+                                if (user.role.name.toUpperCase() == 'ADMIN') roleIcon = Icons.admin_panel_settings;
+                                else if (user.role.name.toUpperCase() == 'WARDEN') roleIcon = Icons.local_police;
+                                
+                                return _buildUserCard(
+                                  initials,
+                                  user.name,
+                                  user.role.name.toUpperCase(),
+                                  roleIcon,
+                                  'Active',
+                                  Colors.green,
+                                  'Just now',
+                                  () async {
+                                    final confirm = await showDialog<bool>(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text('Delete User'),
+                                        content: Text('Are you sure you want to delete ${user.name}?'),
+                                        actions: [
+                                          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+                                          TextButton(onPressed: () => Navigator.pop(context, true), style: TextButton.styleFrom(foregroundColor: AppTheme.error), child: const Text('Delete')),
+                                        ],
+                                      ),
+                                    );
+                                    if (confirm == true) {
+                                      try {
+                                        await ref.read(adminNotifierProvider.notifier).deleteUser(user.id);
+                                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('User deleted successfully')));
+                                      } catch (e) {
+                                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to delete user: $e'), backgroundColor: AppTheme.error));
+                                      }
+                                    }
+                                  },
+                                );
+                              },
+                            );
+                          },
+                          loading: () => const Center(child: CircularProgressIndicator()),
+                          error: (e, st) => Center(child: Text('Error: $e')),
                         );
                       },
                     ),
@@ -171,7 +217,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
   }
 
-  Widget _buildUserCard(String initials, String name, String role, IconData roleIcon, String status, Color statusColor, String lastLogin) {
+  Widget _buildUserCard(String initials, String name, String role, IconData roleIcon, String status, Color statusColor, String lastLogin, VoidCallback onDelete) {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.surfaceContainerLowest,
@@ -203,7 +249,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                         children: [
                           IconButton(icon: const Icon(Icons.edit, size: 16), onPressed: () {}, padding: EdgeInsets.zero, constraints: const BoxConstraints(), color: AppTheme.onSurfaceVariant),
                           const SizedBox(width: 8),
-                          IconButton(icon: const Icon(Icons.delete, size: 16), onPressed: () {}, padding: EdgeInsets.zero, constraints: const BoxConstraints(), color: AppTheme.onSurfaceVariant),
+                          IconButton(icon: const Icon(Icons.delete, size: 16), onPressed: onDelete, padding: EdgeInsets.zero, constraints: const BoxConstraints(), color: AppTheme.error),
                         ],
                       ),
                     ],
