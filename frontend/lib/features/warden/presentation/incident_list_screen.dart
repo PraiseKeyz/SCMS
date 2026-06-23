@@ -78,7 +78,7 @@ class _IncidentListScreenState extends ConsumerState<IncidentListScreen> {
   @override
   Widget build(BuildContext context) {
     return ResponsiveScaffold(
-      title: '[Warden] Active Incidents',
+      title: 'Active Incidents',
       subtitle: 'Incident Management',
       isWarden: true,
       currentIndex: 0,
