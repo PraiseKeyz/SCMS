@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme.dart';
 import '../../../core/widgets/responsive_scaffold.dart';
+import '../../alerts/providers/alerts_provider.dart';
+import 'map_selection_screen.dart';
 
 class IncidentReportScreen extends ConsumerStatefulWidget {
   const IncidentReportScreen({Key? key}) : super(key: key);
@@ -15,14 +17,80 @@ class _IncidentReportScreenState extends ConsumerState<IncidentReportScreen> {
   String? _selectedType;
   final _descController = TextEditingController();
 
-  void _handleSubmit() {
-    if (_formKey.currentState!.validate() && _selectedType != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Incident report submitted successfully.'),
-          backgroundColor: AppTheme.secondary,
+  bool _isSubmitting = false;
+  double? _selectedLat;
+  double? _selectedLng;
+
+  void _useCurrentLocation() {
+    setState(() {
+      _selectedLat = 6.8268;
+      _selectedLng = 3.4622;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Location updated to Current GPS')),
+    );
+  }
+
+  Future<void> _openMapSelection() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MapSelectionScreen(
+          initialLat: _selectedLat ?? 6.8268,
+          initialLng: _selectedLng ?? 3.4622,
         ),
-      );
+      ),
+    );
+
+    if (result != null && result is Map<String, double>) {
+      setState(() {
+        _selectedLat = result['lat'];
+        _selectedLng = result['lng'];
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Location updated from map')));
+      }
+    }
+  }
+
+  Future<void> _handleSubmit() async {
+    if (_formKey.currentState!.validate() && _selectedType != null) {
+      if (_selectedLat == null || _selectedLng == null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a location'), backgroundColor: AppTheme.error));
+        return;
+      }
+      setState(() => _isSubmitting = true);
+      try {
+        await ref.read(alertsNotifierProvider.notifier).reportIncident(
+          _selectedType!,
+          _descController.text,
+          _selectedLat!,
+          _selectedLng!,
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Incident report submitted successfully.'),
+              backgroundColor: AppTheme.secondary,
+            ),
+          );
+          _descController.clear();
+          setState(() => _selectedType = null);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to submit: $e'),
+              backgroundColor: AppTheme.error,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isSubmitting = false);
+        }
+      }
     }
   }
 
@@ -75,10 +143,11 @@ class _IncidentReportScreenState extends ConsumerState<IncidentReportScreen> {
                       ),
                       hint: const Text('Select category...'),
                       items: const [
-                        DropdownMenuItem(value: 'security', child: Text('Security')),
-                        DropdownMenuItem(value: 'medical', child: Text('Medical')),
-                        DropdownMenuItem(value: 'maintenance', child: Text('Maintenance')),
-                        DropdownMenuItem(value: 'parking', child: Text('Parking')),
+                        DropdownMenuItem(value: 'SECURITY', child: Text('Security')),
+                        DropdownMenuItem(value: 'MEDICAL', child: Text('Medical')),
+                        DropdownMenuItem(value: 'FIRE', child: Text('Fire')),
+                        DropdownMenuItem(value: 'CROWD', child: Text('Crowd')),
+                        DropdownMenuItem(value: 'OTHER', child: Text('Other')),
                       ],
                       onChanged: (val) => setState(() => _selectedType = val),
                       validator: (val) => val == null ? 'Please select a type' : null,
@@ -108,7 +177,7 @@ class _IncidentReportScreenState extends ConsumerState<IncidentReportScreen> {
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: () {},
+                            onPressed: _useCurrentLocation,
                             icon: const Icon(Icons.my_location),
                             label: const Text('Current GPS'),
                             style: OutlinedButton.styleFrom(
@@ -123,7 +192,7 @@ class _IncidentReportScreenState extends ConsumerState<IncidentReportScreen> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: () {},
+                            onPressed: _openMapSelection,
                             icon: const Icon(Icons.map),
                             label: const Text('Select on Map'),
                             style: OutlinedButton.styleFrom(
@@ -149,7 +218,12 @@ class _IncidentReportScreenState extends ConsumerState<IncidentReportScreen> {
                         children: [
                           const Icon(Icons.location_on, color: AppTheme.secondary, size: 20),
                           const SizedBox(width: 8),
-                          Text('Zone B - North Gate Parking', style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.onSurfaceVariant)),
+                          Text(
+                            _selectedLat != null && _selectedLng != null
+                                ? 'Lat: ${_selectedLat!.toStringAsFixed(4)}, Lng: ${_selectedLng!.toStringAsFixed(4)}'
+                                : 'No location selected',
+                            style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.onSurfaceVariant),
+                          ),
                         ],
                       ),
                     ),
@@ -181,9 +255,9 @@ class _IncidentReportScreenState extends ConsumerState<IncidentReportScreen> {
 
                     // Submit
                     ElevatedButton.icon(
-                      onPressed: _handleSubmit,
-                      icon: const Icon(Icons.send),
-                      label: const Text('Submit Report'),
+                      onPressed: _isSubmitting ? null : _handleSubmit,
+                      icon: _isSubmitting ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.send),
+                      label: Text(_isSubmitting ? 'Submitting...' : 'Submit Report'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.tertiaryContainer,
                         foregroundColor: AppTheme.onTertiary,

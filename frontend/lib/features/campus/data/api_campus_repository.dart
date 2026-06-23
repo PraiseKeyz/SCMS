@@ -12,12 +12,11 @@ class ApiCampusRepository implements CampusRepository {
   Future<Map<String, dynamic>> getMapBundle() async {
     try {
       final response = await _dio.get('${AppConfig.apiBaseUrl}/campus/map');
-      final data = response.data['data'];
       
       // Data contains zones (geojson), gates, landmarks
-      return data;
+      return response.data;
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Failed to get campus map');
+      throw Exception(e.message ?? 'Failed to get campus map');
     }
   }
 
@@ -25,10 +24,10 @@ class ApiCampusRepository implements CampusRepository {
   Future<List<Gate>> getGates() async {
     try {
       final response = await _dio.get('${AppConfig.apiBaseUrl}/campus/gates');
-      final List data = response.data['data'];
+      final List data = response.data['gates'];
       return data.map((e) => Gate.fromJson(e)).toList();
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Failed to get gates');
+      throw Exception(e.message ?? 'Failed to get gates');
     }
   }
 
@@ -36,10 +35,10 @@ class ApiCampusRepository implements CampusRepository {
   Future<List<Landmark>> getLandmarks() async {
     try {
       final response = await _dio.get('${AppConfig.apiBaseUrl}/campus/landmarks');
-      final List data = response.data['data'];
+      final List data = response.data['landmarks'];
       return data.map((e) => Landmark.fromJson(e)).toList();
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Failed to get landmarks');
+      throw Exception(e.message ?? 'Failed to get landmarks');
     }
   }
 }

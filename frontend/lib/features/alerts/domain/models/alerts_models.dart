@@ -21,9 +21,9 @@ class BroadcastAlert {
     return BroadcastAlert(
       id: json['id'],
       message: json['message'],
-      radiusMeters: (json['radiusMeters'] ?? 0).toDouble(),
-      centerLat: (json['centerLat'] ?? 0).toDouble(),
-      centerLng: (json['centerLng'] ?? 0).toDouble(),
+      radiusMeters: double.tryParse(json['radiusMeters']?.toString() ?? '0') ?? 0.0,
+      centerLat: double.tryParse(json['centerLat']?.toString() ?? '0') ?? 0.0,
+      centerLng: double.tryParse(json['centerLng']?.toString() ?? '0') ?? 0.0,
       active: json['active'] ?? true,
       expiresAt: DateTime.parse(json['expiresAt']),
     );
@@ -52,8 +52,8 @@ class Incident {
       id: json['id'],
       type: json['type'],
       description: json['description'],
-      latitude: (json['latitude'] ?? 0).toDouble(),
-      longitude: (json['longitude'] ?? 0).toDouble(),
+      latitude: double.tryParse(json['latitude']?.toString() ?? '0') ?? 0.0,
+      longitude: double.tryParse(json['longitude']?.toString() ?? '0') ?? 0.0,
       resolved: json['resolved'] ?? false,
     );
   }

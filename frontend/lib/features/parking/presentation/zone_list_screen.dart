@@ -4,11 +4,17 @@ import '../../../core/theme.dart';
 import '../../../core/widgets/responsive_scaffold.dart';
 import '../../../core/widgets/status_badge.dart';
 
-class ZoneListScreen extends StatelessWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/parking_provider.dart';
+import '../domain/models/parking_models.dart';
+
+class ZoneListScreen extends ConsumerWidget {
   const ZoneListScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final zonesAsync = ref.watch(parkingZonesProvider);
+
     return ResponsiveScaffold(
       title: '[Visitor] Parking Zones',
       subtitle: 'Visitor Portal',
@@ -20,143 +26,97 @@ class ZoneListScreen extends StatelessWidget {
         AppNavigationDestination(label: 'Parking', icon: Icons.local_parking, route: '/zone-list'),
         AppNavigationDestination(label: 'Profile', icon: Icons.person, route: '/role-select'),
       ],
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1024),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Controls Area
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isDesktop = constraints.maxWidth > 600;
-                    final buttons = Container(
-                      decoration: BoxDecoration(
-                        color: AppTheme.surfaceContainer,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppTheme.outlineVariant),
-                      ),
-                      padding: const EdgeInsets.all(4),
-                      child: Row(
-                        mainAxisSize: isDesktop ? MainAxisSize.min : MainAxisSize.max,
-                        children: [
-                          Expanded(
-                            flex: isDesktop ? 0 : 1,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: AppTheme.surface,
-                                borderRadius: BorderRadius.circular(6),
-                                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 2)],
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.sort, size: 18, color: AppTheme.primary),
-                                  const SizedBox(width: 8),
-                                  Text('Nearest', style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(color: AppTheme.primary)),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: isDesktop ? 0 : 1,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.check_circle, size: 18, color: AppTheme.onSurfaceVariant),
-                                  const SizedBox(width: 8),
-                                  Text('Most Available', style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(color: AppTheme.onSurfaceVariant)),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-
-                    if (isDesktop) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('[Visitor] Parking Zones', style: AppTheme.lightTheme.textTheme.headlineLarge?.copyWith(color: AppTheme.primary)),
-                              const SizedBox(height: 4),
-                              Text('Real-time availability across campus', style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(color: AppTheme.onSurfaceVariant)),
-                            ],
-                          ),
-                          buttons,
-                        ],
-                      );
-                    } else {
-                      return buttons;
-                    }
-                  },
-                ),
-                
-                const SizedBox(height: 24),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(parkingZonesProvider);
+          await ref.read(parkingZonesProvider.future);
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1024),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('[Visitor] Parking Zones', style: AppTheme.lightTheme.textTheme.headlineLarge?.copyWith(color: AppTheme.primary)),
+                  const SizedBox(height: 4),
+                  Text('Real-time availability across campus', style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(color: AppTheme.onSurfaceVariant)),
+                  const SizedBox(height: 24),
 
                 // Grid Layout
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final crossAxisCount = constraints.maxWidth > 900 ? 3 : (constraints.maxWidth > 600 ? 2 : 1);
-                    return GridView.count(
-                      crossAxisCount: crossAxisCount,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 0.9, // Adjust ratio for mobile/desktop
-                      children: [
-                        _buildZoneCard(
-                          title: 'North Visitor Lot',
-                          subtitle: 'Main Entrance',
-                          spots: 145,
-                          eta: '5 min',
-                          distance: '0.2 miles away',
-                          capacityPercent: 0.25,
-                          status: BadgeStatus.secure,
-                          statusText: '25% Full',
-                          onTap: () => context.push('/zone-list/availability'),
+                zonesAsync.when(
+                  data: (zones) => LayoutBuilder(
+                    builder: (context, constraints) {
+                      final crossAxisCount = constraints.maxWidth > 900 ? 3 : (constraints.maxWidth > 600 ? 2 : 1);
+                      return GridView.builder(
+                        itemCount: zones.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: 0.9,
                         ),
-                        _buildZoneCard(
-                          title: 'East Parking Deck',
-                          subtitle: 'Science Block',
-                          spots: 42,
-                          eta: '12 min',
-                          distance: '0.5 miles away',
-                          capacityPercent: 0.78,
-                          status: BadgeStatus.warning,
-                          statusText: '60% Full',
-                          onTap: () => context.push('/zone-list/availability'),
-                        ),
-                        _buildZoneCard(
-                          title: 'South Library Lot',
-                          subtitle: 'Arts Quarter',
-                          spots: 2,
-                          eta: '2 min',
-                          distance: '0.8 miles away',
-                          capacityPercent: 0.98,
-                          status: BadgeStatus.critical,
-                          statusText: '98% Full',
-                          isFull: true,
-                          onTap: () => context.push('/zone-list/availability'),
-                        ),
-                      ],
-                    );
-                  },
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          final zone = zones[index];
+                          
+                          int spots = zone.capacity;
+                          double percent = 0.0;
+                          BadgeStatus badge = BadgeStatus.secure;
+                          String text = 'Available';
+                          bool isFull = false;
+
+                          if (zone.status == ZoneStatusEnum.available) {
+                            spots = zone.capacity;
+                            percent = 0.2;
+                            badge = BadgeStatus.secure;
+                            text = 'Available';
+                          } else if (zone.status == ZoneStatusEnum.limited) {
+                            spots = (zone.capacity * 0.1).toInt();
+                            percent = 0.9;
+                            badge = BadgeStatus.warning;
+                            text = 'Limited';
+                          } else if (zone.status == ZoneStatusEnum.full) {
+                            spots = 0;
+                            percent = 1.0;
+                            badge = BadgeStatus.critical;
+                            text = 'Full';
+                            isFull = true;
+                          }
+
+                          return _buildZoneCard(
+                            title: zone.name,
+                            subtitle: zone.label,
+                            spots: spots,
+                            eta: 'N/A', // Real ETA would require map routing API
+                            distance: 'N/A',
+                            capacityPercent: percent,
+                            status: badge,
+                            statusText: text,
+                            isFull: isFull,
+                            onTap: () {
+                              context.push('/route-map', extra: {
+                                'lat': zone.lat,
+                                'lng': zone.lng,
+                                'name': zone.name,
+                              });
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (e, st) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.red))),
                 ),
               ],
             ),
           ),
         ),
+      ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/zone-list/availability'),

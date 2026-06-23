@@ -29,9 +29,9 @@ class ApiAlertsRepository implements AlertsRepository {
         },
         options: await _getAuthOptions(),
       );
-      return BroadcastAlert.fromJson(response.data['data']);
+      return BroadcastAlert.fromJson(response.data['alert']);
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Failed to broadcast alert');
+      throw Exception(e.message ?? 'Failed to broadcast alert');
     }
   }
 
@@ -48,9 +48,9 @@ class ApiAlertsRepository implements AlertsRepository {
         },
         options: await _getAuthOptions(),
       );
-      return Incident.fromJson(response.data['data']);
+      return Incident.fromJson(response.data['incident']);
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Failed to report incident');
+      throw Exception(e.message ?? 'Failed to report incident');
     }
   }
 
@@ -61,10 +61,10 @@ class ApiAlertsRepository implements AlertsRepository {
         '${AppConfig.apiBaseUrl}/alerts/active',
         options: await _getAuthOptions(),
       );
-      final List data = response.data['data'];
+      final List data = response.data['alerts'];
       return data.map((e) => BroadcastAlert.fromJson(e)).toList();
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Failed to get active alerts');
+      throw Exception(e.message ?? 'Failed to get active alerts');
     }
   }
 
@@ -75,9 +75,9 @@ class ApiAlertsRepository implements AlertsRepository {
         '${AppConfig.apiBaseUrl}/alerts/incident/$id/resolve',
         options: await _getAuthOptions(),
       );
-      return Incident.fromJson(response.data['data']);
+      return Incident.fromJson(response.data['incident']);
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Failed to resolve incident');
+      throw Exception(e.message ?? 'Failed to resolve incident');
     }
   }
 
@@ -90,7 +90,7 @@ class ApiAlertsRepository implements AlertsRepository {
         options: await _getAuthOptions(),
       );
     } on DioException catch (e) {
-      throw Exception(e.response?.data['message'] ?? 'Failed to check in');
+      throw Exception(e.message ?? 'Failed to check in');
     }
   }
 }

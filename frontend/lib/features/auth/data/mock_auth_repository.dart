@@ -41,6 +41,14 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> changePassword(String currentPassword, String newPassword) async {
+    await Future.delayed(const Duration(milliseconds: 800));
+    if (currentPassword != 'Warden@123' && currentPassword != 'Admin@9999') {
+      throw Exception('Invalid current password');
+    }
+  }
+
+  @override
   Future<void> logout() async {
     await Future.delayed(const Duration(milliseconds: 300));
     _currentUser = null;

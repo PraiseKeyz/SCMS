@@ -47,6 +47,8 @@ class ZoneWithStatus {
   final String label;
   final int capacity;
   final ZoneStatusEnum status;
+  final double lat;
+  final double lng;
 
   ZoneWithStatus({
     required this.id,
@@ -54,12 +56,14 @@ class ZoneWithStatus {
     required this.label,
     required this.capacity,
     required this.status,
+    this.lat = 6.8268,
+    this.lng = 3.4622,
   });
 
   factory ZoneWithStatus.fromJson(Map<String, dynamic> json) {
     ZoneStatusEnum parsedStatus = ZoneStatusEnum.available;
-    if (json['latestStatus'] != null) {
-      switch (json['latestStatus']['status']) {
+    if (json['status'] != null) {
+      switch (json['status']) {
         case 'FULL':
           parsedStatus = ZoneStatusEnum.full;
           break;
@@ -79,6 +83,8 @@ class ZoneWithStatus {
       label: json['label'],
       capacity: json['capacity'],
       status: parsedStatus,
+      lat: json['lat'] ?? (6.8260 + (json['id'].hashCode % 10) * 0.0005),
+      lng: json['lng'] ?? (3.4610 + (json['name'].hashCode % 10) * 0.0005),
     );
   }
 }

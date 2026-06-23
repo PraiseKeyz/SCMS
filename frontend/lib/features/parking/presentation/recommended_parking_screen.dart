@@ -1,12 +1,84 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme.dart';
 import '../../../core/widgets/responsive_scaffold.dart';
+import 'package:go_router/go_router.dart';
 
-class RecommendedParkingScreen extends StatelessWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' hide Size;
+import '../../../core/utils/map_utils.dart';
+import '../providers/parking_provider.dart';
+import '../domain/models/parking_models.dart';
+
+class RecommendedParkingScreen extends ConsumerStatefulWidget {
   const RecommendedParkingScreen({Key? key}) : super(key: key);
 
   @override
+  ConsumerState<RecommendedParkingScreen> createState() => _RecommendedParkingScreenState();
+}
+
+class _RecommendedParkingScreenState extends ConsumerState<RecommendedParkingScreen> {
+  MapboxMap? mapboxMap;
+  PointAnnotationManager? pointAnnotationManager;
+  PolylineAnnotationManager? polylineAnnotationManager;
+  
+  void _drawRoute(double startLat, double startLng, double endLat, double endLng) async {
+    if (polylineAnnotationManager == null) return;
+    await polylineAnnotationManager!.deleteAll();
+    
+    await polylineAnnotationManager!.create(PolylineAnnotationOptions(
+      geometry: LineString(coordinates: [
+        Position(startLng, startLat),
+        Position(endLng, endLat)
+      ]),
+      lineColor: AppTheme.primary.value,
+      lineWidth: 5.0,
+    ));
+
+    mapboxMap?.setCamera(CameraOptions(
+      center: Point(coordinates: Position((startLng + endLng) / 2, (startLat + endLat) / 2)),
+      zoom: 14.0,
+    ));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(nearestZoneProvider.notifier).findNearestZone(6.8268, 3.4622);
+    });
+  }
+
+  void _onMapCreated(MapboxMap mapboxMap, double destLat, double destLng, double parkLat, double parkLng, String parkName) async {
+    this.mapboxMap = mapboxMap;
+    mapboxMap.location.updateSettings(LocationComponentSettings(
+      enabled: true, 
+      puckBearingEnabled: true,
+      pulsingEnabled: true,
+      pulsingColor: Colors.red.value,
+    ));
+
+    pointAnnotationManager = await mapboxMap.annotations.createPointAnnotationManager();
+    polylineAnnotationManager = await mapboxMap.annotations.createPolylineAnnotationManager();
+
+    final destImage = await MapUtils.getBytesFromIcon(Icons.location_on, AppTheme.primary, 48);
+    final parkImage = await MapUtils.getBytesFromInitials('P', AppTheme.secondary, 48);
+
+    await pointAnnotationManager!.createMulti([
+      PointAnnotationOptions(
+        geometry: Point(coordinates: Position(destLng, destLat)),
+        image: destImage,
+      ),
+      PointAnnotationOptions(
+        geometry: Point(coordinates: Position(parkLng, parkLat)),
+        image: parkImage,
+      ),
+    ]);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final recommendationAsync = ref.watch(nearestZoneProvider);
+    final allZonesAsync = ref.watch(parkingZonesProvider);
     return ResponsiveScaffold(
       title: 'Recommended Parking',
       subtitle: 'Central Hub',
@@ -32,144 +104,143 @@ class RecommendedParkingScreen extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // Best Match Card
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceContainerLowest,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppTheme.outlineVariant),
-                    boxShadow: [
-                      BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2)),
-                    ],
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
-                    children: [
-                      // Map Preview
-                      SizedBox(
-                        height: 200,
-                        width: double.infinity,
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            Image.network(
-                              'https://lh3.googleusercontent.com/aida-public/AB6AXuCJg3KVeID2NqABnanvF2K5ibYIf_-GWbm5B2ne077wl3hsGiGqznk3WHP-bMkAmHqTgg51sPUVEBMXvBFYZQiydjpBGmRODKU13dQ0UdDJTElT8-t-LXwDI0vB_Ykpl_nGG2Wl9pvfPlGGCv6jwLNOUAAe6wbY-8WuJUGPMlpOq1ChWRvZYT_zVpsenuNzcv9P_wyUSxgDsQidY4Eeycp-GO8x9EU26dkYP_oK2_qNR7TwwNPZlRjgTnUrqLBsazXhevQpxBWIfGgC',
-                              fit: BoxFit.cover,
-                            ),
-                            // Destination Pin
-                            Positioned(
-                              top: 50,
-                              left: 60,
-                              child: Column(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(4)),
-                                    child: const Text('Destination', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-                                  ),
-                                  const Icon(Icons.location_on, color: AppTheme.primary, size: 32),
-                                ],
-                              ),
-                            ),
-                            // Parking Pin
-                            Positioned(
-                              bottom: 40,
-                              right: 100,
-                              child: Column(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(color: AppTheme.secondary, borderRadius: BorderRadius.circular(4)),
-                                    child: const Text('North Lot', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.onSecondary)),
-                                  ),
-                                  Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.secondary,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: Colors.white, width: 2),
-                                    ),
-                                    child: const Center(child: Text('P', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                recommendationAsync.when(
+                  data: (recommendation) {
+                    if (recommendation == null) return const Text('No recommendations found.');
+                    
+                    String bestZoneName = recommendation.recommendedZoneId;
+                    String bestZoneStatus = 'Unknown';
+                    
+                    if (recommendation.rankedZones.isNotEmpty) {
+                      bestZoneStatus = recommendation.rankedZones.first['status'] ?? 'Unknown';
+                    }
+
+                    // Attempt to lookup name from allZones
+                    allZonesAsync.whenData((zones) {
+                      final match = zones.where((z) => z.id == recommendation.recommendedZoneId).firstOrNull;
+                      if (match != null) bestZoneName = match.name;
+                    });
+
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceContainerLowest,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppTheme.outlineVariant),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2)),
+                        ],
                       ),
-                      
-                      // Card Body
-                      Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          // Map Preview
+                          SizedBox(
+                            height: 200,
+                            width: double.infinity,
+                            child: allZonesAsync.when(
+                              data: (zones) {
+                                final match = zones.where((z) => z.id == recommendation.recommendedZoneId).firstOrNull;
+                                final parkLat = match?.lat ?? 6.8268;
+                                final parkLng = match?.lng ?? 3.4622;
+                                return MapWidget(
+                                  key: const ValueKey("parkingMap"),
+                                  cameraOptions: CameraOptions(
+                                    center: Point(coordinates: Position(3.4622, 6.8268)),
+                                    zoom: 14.0,
+                                  ),
+                                  onMapCreated: (map) => _onMapCreated(map, 6.8268, 3.4622, parkLat, parkLng, bestZoneName),
+                                );
+                              },
+                              loading: () => const Center(child: CircularProgressIndicator()),
+                              error: (e, st) => const Center(child: Text('Map Error')),
+                            ),
+                          ),
+                          
+                          // Card Body
+                          Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text('North Visitor Lot', style: AppTheme.lightTheme.textTheme.titleMedium),
-                                    const SizedBox(height: 4),
-                                    Row(
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Icon(Icons.directions_walk, size: 16, color: AppTheme.onSurfaceVariant),
-                                        const SizedBox(width: 4),
-                                        Text('Est. 5 mins walk • 0.2 miles', style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(color: AppTheme.onSurfaceVariant)),
+                                        Text(bestZoneName, style: AppTheme.lightTheme.textTheme.titleMedium),
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            const Icon(Icons.directions_walk, size: 16, color: AppTheme.onSurfaceVariant),
+                                            const SizedBox(width: 4),
+                                            Text('Recommended', style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(color: AppTheme.onSurfaceVariant)),
+                                          ],
+                                        ),
                                       ],
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.green.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
+                                          const SizedBox(width: 6),
+                                          Text(bestZoneStatus, style: const TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold)),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
-                                      const SizedBox(width: 6),
-                                      const Text('25% Full', style: TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold)),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {},
-                                    icon: const Icon(Icons.navigation),
-                                    label: const Text('Navigate'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppTheme.secondary,
-                                      foregroundColor: AppTheme.onSecondary,
-                                      padding: const EdgeInsets.symmetric(vertical: 16),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                const SizedBox(height: 24),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: ElevatedButton.icon(
+                                        onPressed: () {
+                                          final match = allZonesAsync.value?.where((z) => z.id == recommendation.recommendedZoneId).firstOrNull;
+                                          final pLat = match?.lat ?? 6.8268;
+                                          final pLng = match?.lng ?? 3.4622;
+                                          context.push('/route-map', extra: {
+                                            'lat': pLat,
+                                            'lng': pLng,
+                                            'name': bestZoneName,
+                                          });
+                                        },
+                                        icon: const Icon(Icons.navigation),
+                                        label: const Text('Navigate'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppTheme.secondary,
+                                          foregroundColor: AppTheme.onSecondary,
+                                          padding: const EdgeInsets.symmetric(vertical: 16),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: const Icon(Icons.share),
-                                  style: IconButton.styleFrom(
-                                    side: const BorderSide(color: AppTheme.outline),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                    padding: const EdgeInsets.all(16),
-                                  ),
+                                    const SizedBox(width: 16),
+                                    IconButton(
+                                      onPressed: () {},
+                                      icon: const Icon(Icons.share),
+                                      style: IconButton.styleFrom(
+                                        side: const BorderSide(color: AppTheme.outline),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        padding: const EdgeInsets.all(16),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (e, st) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.red))),
                 ),
                 
                 const SizedBox(height: 32),
@@ -183,9 +254,9 @@ class RecommendedParkingScreen extends StatelessWidget {
                     return Flex(
                       direction: isDesktop ? Axis.horizontal : Axis.vertical,
                       children: [
-                        Expanded(flex: isDesktop ? 1 : 0, child: _buildAlternativeCard('East Parking Deck', '80% Full', Colors.orange, '0.5 miles', '12 mins')),
+                        Expanded(flex: isDesktop ? 1 : 0, child: _buildAlternativeCard(context, 'East Parking Deck', '80% Full', Colors.orange, '0.5 miles', '12 mins', 6.8270, 3.4630)),
                         if (isDesktop) const SizedBox(width: 24) else const SizedBox(height: 16),
-                        Expanded(flex: isDesktop ? 1 : 0, child: _buildAlternativeCard('South Garage', '95% Full', Colors.red, '0.8 miles', '18 mins')),
+                        Expanded(flex: isDesktop ? 1 : 0, child: _buildAlternativeCard(context, 'South Garage', '95% Full', Colors.red, '0.8 miles', '18 mins', 6.8250, 3.4610)),
                       ],
                     );
                   },
@@ -198,7 +269,7 @@ class RecommendedParkingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAlternativeCard(String title, String statusText, Color statusColor, String distance, String walkTime) {
+  Widget _buildAlternativeCard(BuildContext context, String title, String statusText, Color statusColor, String distance, String walkTime, double lat, double lng) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -251,7 +322,13 @@ class RecommendedParkingScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           OutlinedButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              context.push('/route-map', extra: {
+                'lat': lat,
+                'lng': lng,
+                'name': title,
+              });
+            },
             icon: const Icon(Icons.route),
             label: const Text('View Route'),
             style: OutlinedButton.styleFrom(
