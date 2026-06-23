@@ -40,7 +40,7 @@ class _WardenDashboardScreenState extends ConsumerState<WardenDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return ResponsiveScaffold(
-      title: '[Warden] Dashboard',
+      title: 'Dashboard',
       subtitle: 'Admin Portal',
       isWarden: true,
       currentIndex: 0,
@@ -94,7 +94,7 @@ class _WardenDashboardScreenState extends ConsumerState<WardenDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header
-                Text('[Warden] Dashboard', style: AppTheme.lightTheme.textTheme.headlineLarge?.copyWith(color: AppTheme.primaryContainer)),
+                Text('Dashboard', style: AppTheme.lightTheme.textTheme.headlineLarge?.copyWith(color: AppTheme.primaryContainer)),
                 const SizedBox(height: 8),
                 Text('Task-oriented overview for campus staff operations.', style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(color: AppTheme.onSurfaceVariant)),
                 const SizedBox(height: 24),
