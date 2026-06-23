@@ -128,8 +128,16 @@ class _MapHomeScreenState extends ConsumerState<MapHomeScreen> {
     final mapBundleAsync = ref.watch(mapBundleProvider);
 
     return ResponsiveScaffold(
-      title: '[Visitor] Campus Map',
+      title: 'Campus Map',
       subtitle: 'Central Hub',
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: () {
+            ref.invalidate(mapBundleProvider);
+          },
+        ),
+      ],
       isWarden: false,
       currentIndex: 1, // Map index
       destinations: const [
