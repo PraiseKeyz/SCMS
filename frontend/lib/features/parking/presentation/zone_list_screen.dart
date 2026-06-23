@@ -16,7 +16,7 @@ class ZoneListScreen extends ConsumerWidget {
     final zonesAsync = ref.watch(parkingZonesProvider);
 
     return ResponsiveScaffold(
-      title: '[Visitor] Parking Zones',
+      title: 'Parking Zones',
       subtitle: 'Visitor Portal',
       isWarden: false,
       currentIndex: 2, // Parking index
@@ -40,7 +40,7 @@ class ZoneListScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('[Visitor] Parking Zones', style: AppTheme.lightTheme.textTheme.headlineLarge?.copyWith(color: AppTheme.primary)),
+                  Text('Parking Zones', style: AppTheme.lightTheme.textTheme.headlineLarge?.copyWith(color: AppTheme.primary)),
                   const SizedBox(height: 4),
                   Text('Real-time availability across campus', style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(color: AppTheme.onSurfaceVariant)),
                   const SizedBox(height: 24),
