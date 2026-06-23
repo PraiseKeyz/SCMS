@@ -90,8 +90,16 @@ class _RecommendedParkingScreenState extends ConsumerState<RecommendedParkingScr
         AppNavigationDestination(label: 'Parking', icon: Icons.local_parking, route: '/zone-list'),
         AppNavigationDestination(label: 'Profile', icon: Icons.person, route: '/role-select'),
       ],
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(parkingZonesProvider);
+          ref.invalidate(nearestZoneProvider);
+          await ref.read(parkingZonesProvider.future);
+          ref.read(nearestZoneProvider.notifier).findNearestZone(6.8268, 3.4622);
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 800),
@@ -265,6 +273,7 @@ class _RecommendedParkingScreenState extends ConsumerState<RecommendedParkingScr
             ),
           ),
         ),
+      ),
       ),
     );
   }
